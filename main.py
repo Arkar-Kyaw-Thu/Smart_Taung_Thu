@@ -22,6 +22,7 @@ from storage import list_records
 
 BASE_DIR = Path(__file__).resolve().parent
 
+# JSON files are expected inside public/data.
 DATA_DIR = BASE_DIR / "public" / "data"
 
 UPLOAD_FOLDER = (
@@ -31,6 +32,8 @@ UPLOAD_FOLDER = (
 )
 
 PRICE_FOLDER = UPLOAD_FOLDER / "price"
+
+ALLOWED_COLLECTIONS = {"books", "shops", "media"}
 
 
 # =========================================================
@@ -49,10 +52,10 @@ app.secret_key = os.environ.get(
 )
 
 app.json.ensure_ascii = False
-
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
-# Upload directories are only for files; JSON data is read-only.
+
+# Upload directories are separate from read-only JSON data.
 try:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
     PRICE_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -63,9 +66,6 @@ except OSError:
 # =========================================================
 # HELPERS
 # =========================================================
-
-ALLOWED_COLLECTIONS = {"books", "shops", "media"}
-
 
 def extract_month_day(filename):
     name_without_ext = os.path.splitext(filename)[0]
@@ -146,7 +146,7 @@ def health():
 
 
 # =========================================================
-# FLUTTER READ-ONLY JSON API
+# FLUTTER READ-ONLY API
 # =========================================================
 
 @app.route("/api/<collection>", methods=["GET"])
@@ -201,10 +201,54 @@ def get_single_record(collection, record_id):
 
 
 # =========================================================
-# TEMPORARY DATA DIAGNOSTICS
-# Open /api/debug-data to verify deployed JSON files.
-# Remove this endpoint after troubleshooting.
+# TEMPORARY DIAGNOSTIC ENDPOINT
+# Remove after troubleshooting.
 # =========================================================
+
+@app.route("/api/debug-paths", methods=["GET"])
+def debug_paths():
+    candidates = [
+        BASE_DIR / "public" / "data",
+        BASE_DIR.parent / "public" / "data",
+        BASE_DIR / "data",
+    ]
+
+    result = {
+        "main_file": str(Path(__file__).resolve()),
+        "base_directory": str(BASE_DIR),
+        "expected_data_directory": str(DATA_DIR),
+        "checked_directories": [],
+    }
+
+    for folder in candidates:
+        try:
+            exists = folder.is_dir()
+
+            files = (
+                sorted(
+                    file.name
+                    for file in folder.iterdir()
+                    if file.is_file()
+                )
+                if exists
+                else []
+            )
+
+            result["checked_directories"].append({
+                "path": str(folder),
+                "exists": exists,
+                "files": files,
+            })
+
+        except OSError as exc:
+            result["checked_directories"].append({
+                "path": str(folder),
+                "exists": False,
+                "error": str(exc),
+            })
+
+    return jsonify(result)
+
 
 @app.route("/api/debug-data", methods=["GET"])
 def debug_data():
@@ -217,22 +261,14 @@ def debug_data():
             with path.open("r", encoding="utf-8-sig") as file:
                 data = json.load(file)
 
-            if not isinstance(data, list):
-                result[name] = {
-                    "exists": True,
-                    "valid_json": True,
-                    "valid_structure": False,
-                    "error": "JSON root must be an array",
-                }
-                continue
-
             result[name] = {
                 "exists": True,
                 "valid_json": True,
-                "valid_structure": all(
-                    isinstance(item, dict) for item in data
+                "valid_structure": (
+                    isinstance(data, list)
+                    and all(isinstance(item, dict) for item in data)
                 ),
-                "count": len(data),
+                "count": len(data) if isinstance(data, list) else None,
             }
 
         except Exception as exc:
@@ -277,7 +313,6 @@ def download_price(filename):
 
 # =========================================================
 # LOCAL DEVELOPMENT
-# Vercel imports the Flask app directly.
 # =========================================================
 
 if __name__ == "__main__":
