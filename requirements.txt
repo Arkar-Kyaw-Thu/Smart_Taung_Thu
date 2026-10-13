@@ -1,20 +1,10 @@
-# Web Framework
 Flask
-
-# Web Scraping & Data Processing
 requests
 beautifulsoup4
 pandas
 openpyxl
-
-# YouTube Media
 yt-dlp
-
-# AI / RAG
-langchain-text-splitters
-langchain-huggingface
-langchain-chroma
-sentence-transformers
-chromadb
-google-genai
 python-dotenv
+google-genai
+langchain-community
+rank-bm25
