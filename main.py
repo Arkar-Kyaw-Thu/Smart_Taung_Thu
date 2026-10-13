@@ -31,7 +31,7 @@ from storage import (
     restore_record,
 )
 
-from service.media_service import MarketPriceService # type: ignore
+from service.media_service import MarketPriceService 
 
 
 # =========================================================
