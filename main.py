@@ -24,10 +24,8 @@ from storage import list_records
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "public" / "data"
 
-if os.environ.get("VERCEL") == "1":
-    UPLOAD_FOLDER = Path("/tmp/uploads")
-else:
-    UPLOAD_FOLDER = BASE_DIR / "public" / "uploads"
+
+UPLOAD_FOLDER = BASE_DIR / "public" / "uploads"
 
 PRICE_FOLDER = UPLOAD_FOLDER / "price"
 
