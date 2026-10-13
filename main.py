@@ -24,13 +24,20 @@ from services.price_service import MarketPriceService
 from services.media_service import MediaService
 
 
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
+# Vercel မှာ temporary writable directory ကို အသုံးပြုပါ
+if os.environ.get("VERCEL") == "1":
+    UPLOAD_FOLDER = "/tmp/uploads"
+else:
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, "public", "uploads")
+
 PRICE_FOLDER = os.path.join(UPLOAD_FOLDER, "price")
 
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(PRICE_FOLDER, exist_ok=True)
+
 
 app = Flask(
     __name__,
