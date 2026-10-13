@@ -1,6 +1,5 @@
 
 import json
-import os
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -14,41 +13,35 @@ JSON_FILES = {
 
 
 def _get_path(collection):
-    """Allow only predefined JSON collections."""
     if collection not in JSON_FILES:
         raise ValueError(f"Unknown collection: {collection}")
-
     return JSON_FILES[collection]
 
 
 def _read_all(collection):
-    """Read records without creating or modifying files."""
     path = _get_path(collection)
 
     if not path.is_file():
         raise FileNotFoundError(
-            f"Required JSON file does not exist: {path}"
+            f"{collection}.json not found in public/data"
         )
 
     try:
-        with path.open("r", encoding="utf-8") as file:
+        with path.open("r", encoding="utf-8-sig") as file:
             data = json.load(file)
     except json.JSONDecodeError as exc:
         raise ValueError(
-            f"{path.name} contains invalid JSON: {exc}"
+            f"{collection}.json contains invalid JSON "
+            f"at line {exc.lineno}, column {exc.colno}"
         ) from exc
 
     if not isinstance(data, list):
-        raise ValueError(
-            f"{path.name} must contain a JSON array."
-        )
+        raise ValueError(f"{collection}.json must contain a JSON array")
 
-    for index, record in enumerate(data):
-        if not isinstance(record, dict):
-            raise ValueError(
-                f"{path.name}: record at index {index} "
-                "must be a JSON object."
-            )
+    if not all(isinstance(item, dict) for item in data):
+        raise ValueError(
+            f"{collection}.json must contain JSON objects in its array"
+        )
 
     return data
 
@@ -61,16 +54,11 @@ def _safe_int(value):
 
 
 def list_records(collection, include_deleted=False):
-    """
-    Return records ordered by ID descending.
-    Soft-deleted records are hidden by default.
-    """
     records = _read_all(collection)
 
     if not include_deleted:
         records = [
-            record
-            for record in records
+            record for record in records
             if not record.get("delete_at")
         ]
 
@@ -82,9 +70,7 @@ def list_records(collection, include_deleted=False):
 
 
 def get_record(collection, record_id):
-    """Return one non-deleted record, or None."""
     for record in list_records(collection):
         if str(record.get("id")) == str(record_id):
             return record
-
     return None

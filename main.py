@@ -1,6 +1,8 @@
 
 import os
 import re
+import json
+from pathlib import Path
 
 from flask import (
     Flask,
@@ -8,30 +10,37 @@ from flask import (
     render_template,
     send_from_directory,
 )
+
 from werkzeug.utils import secure_filename
 
 from storage import list_records
 
 
-# --------------------------------------------------
-# APP CONFIGURATION
-# --------------------------------------------------
+# =========================================================
+# PATHS
+# =========================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = Path(__file__).resolve().parent
 
-if os.environ.get("VERCEL") == "1":
-    UPLOAD_FOLDER = "/tmp/uploads"
-else:
-    UPLOAD_FOLDER = os.path.join(
-        BASE_DIR, "public", "uploads"
-    )
+DATA_DIR = BASE_DIR / "public" / "data"
 
-PRICE_FOLDER = os.path.join(UPLOAD_FOLDER, "price")
+UPLOAD_FOLDER = (
+    Path("/tmp/uploads")
+    if os.environ.get("VERCEL") == "1"
+    else BASE_DIR / "public" / "uploads"
+)
+
+PRICE_FOLDER = UPLOAD_FOLDER / "price"
+
+
+# =========================================================
+# FLASK APP
+# =========================================================
 
 app = Flask(
     __name__,
-    template_folder=os.path.join(BASE_DIR, "templates"),
-    static_folder=os.path.join(BASE_DIR, "static"),
+    template_folder=str(BASE_DIR / "templates"),
+    static_folder=str(BASE_DIR / "static"),
 )
 
 app.secret_key = os.environ.get(
@@ -39,20 +48,26 @@ app.secret_key = os.environ.get(
     "change-this-secret-key-before-deployment",
 )
 
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 app.json.ensure_ascii = False
 
+app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
-# Only these collections are exposed to Flutter.
+# Upload directories are only for files; JSON data is read-only.
+try:
+    UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
+    PRICE_FOLDER.mkdir(parents=True, exist_ok=True)
+except OSError:
+    app.logger.warning("Could not create upload directories")
+
+
+# =========================================================
+# HELPERS
+# =========================================================
+
 ALLOWED_COLLECTIONS = {"books", "shops", "media"}
 
 
-# --------------------------------------------------
-# HELPERS
-# --------------------------------------------------
-
 def extract_month_day(filename):
-    """Extract month/day display text from Excel filename."""
     name_without_ext = os.path.splitext(filename)[0]
 
     match = re.search(
@@ -66,16 +81,16 @@ def extract_month_day(filename):
     return name_without_ext
 
 
-def error_response(message, status=500):
+def json_error(message, status=400):
     return jsonify({
         "success": False,
-        "message": message,
+        "message": str(message),
     }), status
 
 
-# --------------------------------------------------
-# HOME / READ-ONLY DASHBOARD
-# --------------------------------------------------
+# =========================================================
+# DASHBOARD
+# =========================================================
 
 @app.route("/", methods=["GET"])
 def index():
@@ -84,82 +99,60 @@ def index():
         shops = list_records("shops")
         media = list_records("media")
 
-    except Exception:
-        app.logger.exception(
-            "Unable to load dashboard data"
+        price_files = []
+
+        if PRICE_FOLDER.is_dir():
+            for filename in os.listdir(PRICE_FOLDER):
+                if filename.lower().endswith((".xlsx", ".xls")):
+                    price_files.append({
+                        "raw_name": filename,
+                        "display_name": extract_month_day(filename),
+                    })
+
+        price_files.sort(
+            key=lambda item: item["raw_name"],
+            reverse=True,
         )
+
+        return render_template(
+            "index.html",
+            books=books,
+            shops=shops,
+            media=media,
+            price_files=price_files,
+            read_only=True,
+        )
+
+    except Exception as exc:
+        app.logger.exception("Dashboard data loading failed")
+
         return (
-            "Dashboard data ကို ဖတ်မရပါ။ "
-            "Vercel Logs ကို စစ်ဆေးပါ။",
+            f"Dashboard data error: {type(exc).__name__}: {exc}",
             500,
         )
 
-    price_files = []
 
-    if os.path.isdir(PRICE_FOLDER):
-        try:
-            for filename in os.listdir(PRICE_FOLDER):
-                if not filename.lower().endswith(
-                    (".xlsx", ".xls")
-                ):
-                    continue
-
-                file_path = os.path.join(
-                    PRICE_FOLDER, filename
-                )
-
-                if os.path.isfile(file_path):
-                    price_files.append({
-                        "raw_name": filename,
-                        "display_name": extract_month_day(
-                            filename
-                        ),
-                    })
-
-        except OSError:
-            app.logger.exception(
-                "Unable to list price files"
-            )
-
-    price_files.sort(
-        key=lambda item: item["raw_name"],
-        reverse=True,
-    )
-
-    return render_template(
-        "index.html",
-        books=books,
-        shops=shops,
-        media=media,
-        price_files=price_files,
-        read_only=True,
-    )
-
-
-# --------------------------------------------------
+# =========================================================
 # HEALTH CHECK
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/api/health", methods=["GET"])
-def health_check():
+def health():
     return jsonify({
         "success": True,
-        "status": "healthy",
+        "message": "API is running",
         "read_only": True,
     })
 
 
-# --------------------------------------------------
+# =========================================================
 # FLUTTER READ-ONLY JSON API
-# --------------------------------------------------
+# =========================================================
 
 @app.route("/api/<collection>", methods=["GET"])
-def flutter_read_data(collection):
+def get_collection(collection):
     if collection not in ALLOWED_COLLECTIONS:
-        return error_response(
-            "Data category not found",
-            404,
-        )
+        return json_error("Unknown collection", 404)
 
     try:
         records = list_records(collection)
@@ -168,92 +161,128 @@ def flutter_read_data(collection):
             "success": True,
             "count": len(records),
             "data": records,
-        }), 200
-
-    except FileNotFoundError:
-        app.logger.exception(
-            "Missing JSON file for %s", collection
-        )
-        return error_response(
-            f"{collection}.json not found",
-            404,
-        )
-
-    except ValueError:
-        app.logger.exception(
-            "Invalid JSON data for %s", collection
-        )
-        return error_response(
-            f"{collection}.json is invalid",
-            500,
-        )
-
-    except OSError:
-        app.logger.exception(
-            "Unable to read %s", collection
-        )
-        return error_response(
-            "Unable to read data",
-            500,
-        )
+        })
 
     except Exception:
         app.logger.exception(
-            "Unexpected API error for %s", collection
+            "Failed to read collection: %s",
+            collection,
         )
-        return error_response(
-            "Internal server error",
+        return json_error(
+            f"Unable to read {collection} data",
             500,
         )
 
 
-# --------------------------------------------------
-# READ-ONLY EXCEL DOWNLOAD
-# --------------------------------------------------
+@app.route("/api/<collection>/<record_id>", methods=["GET"])
+def get_single_record(collection, record_id):
+    if collection not in ALLOWED_COLLECTIONS:
+        return json_error("Unknown collection", 404)
 
-@app.route(
-    "/download-price/<path:filename>",
-    methods=["GET"],
-)
+    try:
+        records = list_records(collection)
+
+        for record in records:
+            if str(record.get("id")) == str(record_id):
+                return jsonify({
+                    "success": True,
+                    "data": record,
+                })
+
+        return json_error("Record not found", 404)
+
+    except Exception:
+        app.logger.exception(
+            "Failed to read %s record %s",
+            collection,
+            record_id,
+        )
+        return json_error("Unable to read record", 500)
+
+
+# =========================================================
+# TEMPORARY DATA DIAGNOSTICS
+# Open /api/debug-data to verify deployed JSON files.
+# Remove this endpoint after troubleshooting.
+# =========================================================
+
+@app.route("/api/debug-data", methods=["GET"])
+def debug_data():
+    result = {}
+
+    for name in ("books", "shops", "media"):
+        path = DATA_DIR / f"{name}.json"
+
+        try:
+            with path.open("r", encoding="utf-8-sig") as file:
+                data = json.load(file)
+
+            if not isinstance(data, list):
+                result[name] = {
+                    "exists": True,
+                    "valid_json": True,
+                    "valid_structure": False,
+                    "error": "JSON root must be an array",
+                }
+                continue
+
+            result[name] = {
+                "exists": True,
+                "valid_json": True,
+                "valid_structure": all(
+                    isinstance(item, dict) for item in data
+                ),
+                "count": len(data),
+            }
+
+        except Exception as exc:
+            result[name] = {
+                "exists": path.is_file(),
+                "error": f"{type(exc).__name__}: {exc}",
+            }
+
+    return jsonify(result)
+
+
+# =========================================================
+# READ-ONLY FILE ACCESS
+# =========================================================
+
+@app.route("/files/<path:filename>", methods=["GET"])
+def uploaded_file(filename):
+    return send_from_directory(
+        str(UPLOAD_FOLDER),
+        filename,
+    )
+
+
+@app.route("/download-price/<path:filename>", methods=["GET"])
 def download_price(filename):
     safe_filename = secure_filename(filename)
 
     if not safe_filename or safe_filename != filename:
         return "Invalid filename", 400
 
-    file_path = os.path.join(
-        PRICE_FOLDER, safe_filename
-    )
+    file_path = PRICE_FOLDER / safe_filename
 
-    if not os.path.isfile(file_path):
+    if not file_path.is_file():
         return "File not found", 404
 
     return send_from_directory(
-        PRICE_FOLDER,
+        str(PRICE_FOLDER),
         safe_filename,
         as_attachment=True,
     )
 
 
-# --------------------------------------------------
-# READ-ONLY UPLOADED FILE ACCESS
-# --------------------------------------------------
-
-@app.route("/files/<path:filename>", methods=["GET"])
-def custom_static(filename):
-    return send_from_directory(
-        app.config["UPLOAD_FOLDER"],
-        filename,
-    )
-
-
-# --------------------------------------------------
+# =========================================================
 # LOCAL DEVELOPMENT
-# --------------------------------------------------
+# Vercel imports the Flask app directly.
+# =========================================================
 
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
-        port=int(os.environ.get("PORT", "8000")),
+        port=int(os.environ.get("PORT", 8000)),
         debug=False,
     )
