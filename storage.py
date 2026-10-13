@@ -3,7 +3,14 @@ import json
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "public" / "data"
+
+DATA_DIR = BASE_DIR / "data"
+KB_DIR = BASE_DIR / "kb"
+UPLOAD_DIR = BASE_DIR / "uploads"
+
+PRICE_DIR = UPLOAD_DIR / "price"
+BOOK_COVER_DIR = UPLOAD_DIR / "book_cover"
+BOOK_PDF_DIR = UPLOAD_DIR / "book_pdf"
 
 JSON_FILES = {
     "books": DATA_DIR / "books.json",

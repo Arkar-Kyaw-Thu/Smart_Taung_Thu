@@ -13,6 +13,10 @@ from flask import (
 from storage import (
     BASE_DIR,
     DATA_DIR,
+    UPLOAD_DIR,
+    PRICE_DIR,
+    BOOK_COVER_DIR,
+    BOOK_PDF_DIR,
     JSON_FILES,
     list_records,
     get_record,
@@ -29,9 +33,29 @@ app = Flask(
     static_folder=str(BASE_DIR / "static"),
 )
 
-PUBLIC_DIR = BASE_DIR / "public"
-UPLOAD_FOLDER = PUBLIC_DIR / "uploads"
-PRICE_FOLDER = UPLOAD_FOLDER / "price"
+# Project folders:
+#
+# project/
+# ├── data/
+# │   ├── books.json
+# │   ├── shops.json
+# │   └── media.json
+# ├── kb/
+# ├── uploads/
+# │   ├── price/
+# │   ├── book_cover/
+# │   └── book_pdf/
+# ├── templates/
+# │   └── index.html
+# ├── static/
+# ├── main.py
+# ├── storage.py
+# └── rag_service.py
+
+UPLOAD_FOLDER = UPLOAD_DIR
+PRICE_FOLDER = PRICE_DIR
+BOOK_COVER_FOLDER = BOOK_COVER_DIR
+BOOK_PDF_FOLDER = BOOK_PDF_DIR
 
 ALLOWED_COLLECTIONS = {"books", "shops", "media"}
 EXCEL_EXTENSIONS = {".xlsx", ".xls", ".xlsm"}
@@ -77,6 +101,7 @@ def index():
 
     except Exception as exc:
         app.logger.exception("Dashboard data loading failed")
+
         return (
             f"Dashboard data error: "
             f"{type(exc).__name__}: {exc}",
@@ -86,6 +111,7 @@ def index():
 
 # --------------------------------------------------
 # Health check
+# GET /api/health
 # --------------------------------------------------
 
 @app.route("/api/health", methods=["GET"])
@@ -93,17 +119,33 @@ def health():
     return jsonify({
         "status": "ok",
         "read_only": True,
+
+        "base_directory": str(BASE_DIR),
+
         "data_directory": str(DATA_DIR),
         "data": data_status(),
+
         "upload_directory": str(UPLOAD_FOLDER),
+
         "price_directory": str(PRICE_FOLDER),
         "price_directory_exists": PRICE_FOLDER.is_dir(),
         "price_files": get_price_files(),
+
+        "book_cover_directory": str(BOOK_COVER_FOLDER),
+        "book_cover_directory_exists": (
+            BOOK_COVER_FOLDER.is_dir()
+        ),
+
+        "book_pdf_directory": str(BOOK_PDF_FOLDER),
+        "book_pdf_directory_exists": (
+            BOOK_PDF_FOLDER.is_dir()
+        ),
     })
 
 
 # --------------------------------------------------
 # Flutter API: list records
+#
 # GET /api/books
 # GET /api/shops
 # GET /api/media
@@ -113,6 +155,7 @@ def health():
 def api_list(collection):
     if collection not in ALLOWED_COLLECTIONS:
         return jsonify({
+            "success": False,
             "error": "Unknown collection",
             "allowed": sorted(ALLOWED_COLLECTIONS),
         }), 404
@@ -127,12 +170,16 @@ def api_list(collection):
         })
 
     except FileNotFoundError as exc:
+        app.logger.error("Data file not found: %s", exc)
+
         return jsonify({
             "success": False,
             "error": str(exc),
         }), 500
 
     except (ValueError, json.JSONDecodeError) as exc:
+        app.logger.error("Invalid JSON data: %s", exc)
+
         return jsonify({
             "success": False,
             "error": str(exc),
@@ -140,6 +187,7 @@ def api_list(collection):
 
     except Exception:
         app.logger.exception("API list failed")
+
         return jsonify({
             "success": False,
             "error": "Internal server error",
@@ -148,6 +196,7 @@ def api_list(collection):
 
 # --------------------------------------------------
 # Flutter API: get one record
+#
 # GET /api/books/1
 # GET /api/shops/1
 # GET /api/media/1
@@ -157,7 +206,9 @@ def api_list(collection):
 def api_detail(collection, record_id):
     if collection not in ALLOWED_COLLECTIONS:
         return jsonify({
+            "success": False,
             "error": "Unknown collection",
+            "allowed": sorted(ALLOWED_COLLECTIONS),
         }), 404
 
     try:
@@ -175,6 +226,8 @@ def api_detail(collection, record_id):
         })
 
     except (FileNotFoundError, ValueError) as exc:
+        app.logger.error("Record lookup failed: %s", exc)
+
         return jsonify({
             "success": False,
             "error": str(exc),
@@ -182,6 +235,7 @@ def api_detail(collection, record_id):
 
     except Exception:
         app.logger.exception("API detail failed")
+
         return jsonify({
             "success": False,
             "error": "Internal server error",
@@ -189,8 +243,13 @@ def api_detail(collection, record_id):
 
 
 # --------------------------------------------------
-# Existing upload files
-# Example: /files/book_cover/example.png
+# Serve existing uploaded files
+#
+# GET /files/price/example.xlsx
+# GET /files/book_cover/example.png
+# GET /files/book_pdf/example.pdf
+#
+# Files are served from uploads/
 # --------------------------------------------------
 
 @app.route("/files/<path:filename>", methods=["GET"])
@@ -207,7 +266,8 @@ def uploaded_file(filename):
 
 # --------------------------------------------------
 # Download existing Excel price files
-# Example: /download-price/prices.xlsx
+#
+# GET /download-price/prices.xlsx
 # --------------------------------------------------
 
 @app.route("/download-price/<path:filename>", methods=["GET"])
@@ -226,50 +286,78 @@ def download_price(filename):
 
 
 # --------------------------------------------------
-# Diagnostics: inspect expected paths
+# Diagnostics: inspect expected project paths
+#
+# GET /api/debug-paths
 # --------------------------------------------------
 
 @app.route("/api/debug-paths", methods=["GET"])
 def debug_paths():
     paths = [
         BASE_DIR / "data",
-        BASE_DIR / "public" / "data",
-        BASE_DIR.parent / "data",
-        BASE_DIR.parent / "public" / "data",
+        BASE_DIR / "kb",
+        BASE_DIR / "uploads",
+        BASE_DIR / "uploads" / "price",
+        BASE_DIR / "uploads" / "book_cover",
+        BASE_DIR / "uploads" / "book_pdf",
+        BASE_DIR / "templates",
+        BASE_DIR / "static",
     ]
 
     checked = []
 
     for path in paths:
+        exists = path.is_dir()
+
         checked.append({
             "path": str(path),
-            "exists": path.is_dir(),
+            "exists": exists,
             "files": (
-                sorted(item.name for item in path.iterdir()
-                       if item.is_file())
-                if path.is_dir()
+                sorted(
+                    item.name
+                    for item in path.iterdir()
+                    if item.is_file()
+                )
+                if exists
                 else []
             ),
         })
 
     return jsonify({
         "base_directory": str(BASE_DIR),
-        "expected_data_directory": str(DATA_DIR),
         "main_file": str(Path(__file__).resolve()),
-        "checked_directories": checked,
+
+        "expected_data_directory": str(DATA_DIR),
         "data_status": data_status(),
+
         "upload_directory": str(UPLOAD_FOLDER),
         "upload_directory_exists": UPLOAD_FOLDER.is_dir(),
+
         "price_directory": str(PRICE_FOLDER),
         "price_directory_exists": PRICE_FOLDER.is_dir(),
         "price_files": get_price_files(),
+
+        "book_cover_directory": str(BOOK_COVER_FOLDER),
+        "book_pdf_directory": str(BOOK_PDF_FOLDER),
+
+        "checked_directories": checked,
+        "read_only": True,
     })
 
 
 # --------------------------------------------------
 # Run locally
-# Vercel imports the app object above
+#
+# python main.py
+#
+# Local URL: http://127.0.0.1:5000
+# Vercel can import the app object above,
+# provided the deployment entry point is configured.
 # --------------------------------------------------
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=False)
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=False,
+    )
