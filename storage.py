@@ -1,5 +1,5 @@
-
 import json
+import os
 import threading
 from datetime import datetime
 from pathlib import Path
@@ -24,8 +24,10 @@ JSON_FILES = {
     "media": DATA_DIR / "media.json",
 }
 
-# JSON ဖိုင်ရေးသားရာတွင် တစ်ချိန်တည်းဝင်ရောက်မှုကို
-# ကာကွယ်ရန် process အတွင်း lock အသုံးပြုမည်။
+# Vercel serverless environment
+IS_VERCEL = os.environ.get("VERCEL") == "1"
+
+# Process အတွင်း JSON file access များကို lock လုပ်မည်။
 _storage_lock = threading.RLock()
 
 
@@ -34,16 +36,27 @@ _storage_lock = threading.RLock()
 # =========================================================
 
 def init_storage():
-    """လိုအပ်သော folder နှင့် JSON ဖိုင်များ မရှိသေးလျှင် ဖန်တီးမည်။"""
+    """
+    Local development အတွက် လိုအပ်သော folder နှင့်
+    JSON ဖိုင်များကို ဖန်တီးမည်။
 
-    for folder in (
+    Vercel တွင် deployed application directory ကို
+    ပြင်ဆင်ရန် ကြိုးစားမည်မဟုတ်ပါ။
+    """
+
+    if IS_VERCEL:
+        return
+
+    folders = (
         DATA_DIR,
         KB_DIR,
         UPLOAD_DIR,
         PRICE_DIR,
         BOOK_COVER_DIR,
         BOOK_PDF_DIR,
-    ):
+    )
+
+    for folder in folders:
         folder.mkdir(parents=True, exist_ok=True)
 
     for path in JSON_FILES.values():
@@ -56,7 +69,7 @@ def init_storage():
 # =========================================================
 
 def _validate_collection(collection):
-    """ခွင့်ပြုထားသော collection ကိုသာ အသုံးပြုစေမည်။"""
+    """ခွင့်ပြုထားသော collection ကိုသာ အသုံးပြုမည်။"""
 
     if collection not in JSON_FILES:
         raise ValueError(
@@ -68,13 +81,13 @@ def _validate_collection(collection):
 
 
 def _now():
-    """MySQL TIMESTAMP အစား သုံးမည့် timestamp။"""
+    """MySQL TIMESTAMP အစား အသုံးပြုမည့် timestamp။"""
 
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
 def _read_json(path):
-    """JSON ဖိုင်မှ record အားလုံးကို ဖတ်မည်။"""
+    """JSON ဖိုင်မှ record များကို ဖတ်မည်။"""
 
     if not path.exists():
         return []
@@ -82,6 +95,7 @@ def _read_json(path):
     try:
         with path.open("r", encoding="utf-8-sig") as file:
             data = json.load(file)
+
     except json.JSONDecodeError as exc:
         raise ValueError(
             f"Invalid JSON file: {path}. "
@@ -97,7 +111,19 @@ def _read_json(path):
 
 
 def _write_json(path, records):
-    """JSON ဖိုင်ကို UTF-8 ဖြင့် အစားထိုးသိမ်းမည်။"""
+    """
+    JSON ဖိုင်ကို UTF-8 ဖြင့် သိမ်းမည်။
+
+    Local တွင် လိုအပ်လျှင် parent folder ဖန်တီးမည်။
+    Vercel တွင် folder အသစ်ဖန်တီးရန် မကြိုးစားပါ။
+    """
+
+    if IS_VERCEL:
+        raise OSError(
+            "JSON file writes are disabled on Vercel because "
+            "the deployed filesystem is not persistent writable "
+            "storage. Connect persistent external storage for CRUD."
+        )
 
     path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -129,14 +155,16 @@ def _next_id(records):
     for record in records:
         record_id = record.get("id")
 
-        if isinstance(record_id, int) and not isinstance(record_id, bool):
+        if isinstance(record_id, int) and not isinstance(
+            record_id, bool
+        ):
             ids.append(record_id)
 
     return max(ids, default=0) + 1
 
 
 def _find_record(records, record_id):
-    """ID ကို string/int နှစ်မျိုးစလုံးဖြင့် ရှာနိုင်မည်။"""
+    """ID ကို string သို့မဟုတ် integer ဖြင့် ရှာနိုင်မည်။"""
 
     for record in records:
         if str(record.get("id")) == str(record_id):
@@ -187,7 +215,10 @@ def get_record(collection, record_id, include_deleted=False):
         if record is None:
             return None
 
-        if not include_deleted and record.get("delete_at") is not None:
+        if (
+            not include_deleted
+            and record.get("delete_at") is not None
+        ):
             return None
 
         return record
@@ -285,8 +316,7 @@ def update_record(collection, record_id, updates):
 
 def delete_record(collection, record_id):
     """
-    MySQL: UPDATE table SET delete_at = CURRENT_TIMESTAMP
-    အစား JSON record ၏ delete_at ကို သတ်မှတ်မည်။
+    Record ကို အမှန်တကယ် မဖျက်ဘဲ delete_at သတ်မှတ်မည်။
     """
 
     path = _validate_collection(collection)
@@ -350,11 +380,13 @@ def data_status():
                 "path": str(path),
                 "count": len(records),
                 "active_count": sum(
-                    1 for item in records
+                    1
+                    for item in records
                     if item.get("delete_at") is None
                 ),
                 "deleted_count": sum(
-                    1 for item in records
+                    1
+                    for item in records
                     if item.get("delete_at") is not None
                 ),
             }
@@ -369,5 +401,11 @@ def data_status():
     return result
 
 
-# App စတင်ချိန်တွင် folder နှင့် JSON ဖိုင်များ ပြင်ဆင်မည်။
-init_storage()
+# =========================================================
+# Local initialization only
+# =========================================================
+
+if __name__ == "__main__":
+    init_storage()
+    print("Storage initialized.")
+    print(json.dumps(data_status(), ensure_ascii=False, indent=2))
