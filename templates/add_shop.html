@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Shop</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 40px; 
+            background-color: #f4f6f9; 
+        }
+        .form-container { 
+            max-width: 650px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 30px; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); 
+        }
+        h2 {
+            margin-top: 0;
+            margin-bottom: 25px;
+            color: #333;
+            text-align: center;
+        }
+        
+        /* Column 2 ခု ခွဲသည့် Grid Style */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Equal 2 columns */
+            gap: 15px 20px; /* Vertical & Horizontal spacing */
+        }
+        
+        .form-group { 
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label { 
+            margin-bottom: 6px; 
+            font-weight: 600; 
+            font-size: 14px;
+            color: #444;
+        }
+        
+        input[type="text"], textarea { 
+            width: 100%; 
+            padding: 10px; 
+            box-sizing: border-box; 
+            border: 1px solid #ccc; 
+            border-radius: 6px; 
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        
+        input[type="text"]:focus, textarea:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 38px;
+        }
+
+        /* Button ကို အောက်ဆုံးတွင် အပြည့်ထားခြင်း */
+        .submit-btn { 
+            grid-column: span 2; /* Column ၂ ခုလုံး၏ အကျယ်ကို ယူမည် */
+            margin-top: 10px;
+            padding: 12px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 16px; 
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+        
+        .submit-btn:hover { 
+            background-color: #218838; 
+        }
+        
+        .back-link { 
+            display: inline-block; 
+            margin-top: 20px; 
+            color: #007bff; 
+            text-decoration: none; 
+            font-weight: 500;
+        }
+        
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile Phone များတွင် Column 1 ခုတည်း အလိုအလျောက် ပြောင်းသွားစေရန် Responsive CSS */
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .submit-btn {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>🏪 ဆိုင်အသစ်ထည့်ရန်</h2>
+        <form method="POST">
+            <div class="form-grid">
+                <!-- Left Column (၃ ခု) -->
+                <div class="form-group">
+                    <label>ဆိုင်အမည်:</label>
+                    <input type="text" name="name" required placeholder="ဆိုင်အမည် ထည့်ပါ">
+                </div>
+
+                <div class="form-group">
+                    <label>ဖုန်းနံပါတ်:</label>
+                    <input type="text" name="phone" placeholder="09xxxxxxxxx">
+                </div>
+
+                <div class="form-group">
+                    <label>လိပ်စာ:</label>
+                    <textarea name="address" rows="1" placeholder="ဆိုင်လိပ်စာ ထည့်ပါ"></textarea>
+                </div>
+
+                <!-- Right Column (၃ ခု) -->
+                <div class="form-group">
+                    <label>ဆိုင်အမျိုးအစား:</label>
+                    <input type="text" name="type" placeholder="ဥပမာ - မျိုးစေ့/မြေသြဇာဆိုင်">
+                </div>
+
+                <div class="form-group">
+                    <label>Latitude:</label>
+                    <input type="text" name="latitude" value="0.0">
+                </div>
+
+                <div class="form-group">
+                    <label>Longitude:</label>
+                    <input type="text" name="longitude" value="0.0">
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-btn">သိမ်းဆည်းမည်</button>
+            </div>
+        </form>
+        
+        <a href="/" class="back-link">← Main Menu သို့ပြန်သွားရန်</a>
+    </div>
+</body>
+</html>

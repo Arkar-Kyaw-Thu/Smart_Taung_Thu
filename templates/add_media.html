@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Media</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background-color: #f4f6f9; }
+        .form-container { max-width: 500px; margin: 0 auto; background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], textarea, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; background-color: white; font-size: 14px; }
+        button { padding: 10px 20px; background-color: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%; font-size: 16px; margin-top: 10px; }
+        button:hover { background-color: #218838; }
+        a { color: #007bff; text-decoration: none; display: inline-block; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h2>🎬 Media အသစ်ထည့်ရန်</h2>
+        <form method="POST">
+            <div class="form-group">
+                <label>အကြောင်းအရာ ဖော်ပြချက် (Description):</label>
+                <textarea name="description" rows="4" placeholder="ဗီဒီယို သို့မဟုတ် မီဒီယာအကြောင်း ဖော်ပြချက်..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>Media Link (URL):</label>
+                <input type="text" name="link" placeholder="https://youtube.com/watch?v=..." required>
+            </div>
+            <div class="form-group">
+                <label>အမျိုးအစား (Type):</label>
+                <select name="type" required>
+                    <option value="news">news</option>
+                    <option value="knowledge">knowledge</option>
+                </select>
+            </div>
+            <button type="submit">သိမ်းဆည်းမည်</button>
+        </form>
+        <a href="/">← Main Menu သို့ပြန်သွားရန်</a>
+    </div>
+</body>
+</html>

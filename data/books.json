@@ -1,0 +1,11 @@
+[
+  {
+    "id": 1,
+    "name": "ကစော့ခါး",
+    "image_path": "book_cover/png",
+    "file_path": "book_file/pdf",
+    "created_at": "2026-10-13T05:15:22.107148+00:00",
+    "updated_at": "2026-10-13T05:15:22.107148+00:00",
+    "delete_at": null
+  }
+]

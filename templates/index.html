@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f6f9; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Styling */
+        .sidebar { width: 250px; background-color: #1e293b; color: white; display: flex; flex-direction: column; padding: 20px; transition: all 0.3s ease; flex-shrink: 0; }
+        .sidebar h2 { font-size: 20px; margin-bottom: 30px; text-align: center; border-bottom: 1px solid #334155; padding-bottom: 15px; }
+        .sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
+        .nav-btn { background: none; border: none; color: #94a3b8; padding: 12px 15px; text-align: left; font-size: 15px; cursor: pointer; border-radius: 6px; transition: 0.2s; width: 100%; white-space: nowrap; }
+        .nav-btn:hover, .nav-btn.active { background-color: #0f172a; color: #38bdf8; font-weight: bold; }
+        
+        /* Main Content Area */
+        .main-content { flex: 1; padding: 25px; overflow-y: auto; width: 100%; }
+        .section { display: none; }
+        .section.active { display: block; }
+        
+        /* Header Bar */
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: white; padding: 15px 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); flex-wrap: wrap; gap: 10px; }
+        .header-bar h1 { font-size: 20px; color: #1e293b; }
+        
+        .add-btn, .fetch-btn { background-color: #2563eb; color: white; padding: 9px 16px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 14px; transition: 0.2s; display: inline-block; border: none; cursor: pointer; }
+        .add-btn:hover, .fetch-btn:hover { background-color: #1d4ed8; }
+        .fetch-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
+
+        /* Responsive Table Container & Alignment */
+        .table-container { background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow-x: auto; width: 100%; }
+        table { width: 100%; border-collapse: collapse; text-align: left; table-layout: fixed; min-width: 600px; }
+        table tr { border-bottom: 1px solid #e2e8f0; }
+        th, td { padding: 12px 16px; font-size: 14px; word-wrap: break-word; vertical-align: middle; }
+        th { background-color: #f8fafc; color: #475569; font-weight: 600; white-space: nowrap; }
+        tr:hover { background-color: #f1f5f9; }
+
+        th:last-child, td:last-child { width: 130px; text-align: center; }
+
+        /* Action Buttons */
+        .action-btns { display: flex; gap: 6px; justify-content: center; }
+        .edit-btn { background-color: #eab308; color: white; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
+        .edit-btn:hover { background-color: #ca8a04; }
+        .delete-btn { background-color: #ef4444; color: white; padding: 6px 12px; text-decoration: none; border-radius: 4px; font-size: 12px; font-weight: bold; display: inline-block; }
+        .delete-btn:hover { background-color: #dc2626; }
+
+        /* Market Price Card Grid Design */
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+        .file-card { background: white; border-radius: 10px; padding: 16px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: space-between; gap: 12px; transition: transform 0.2s, box-shadow 0.2s; }
+        .file-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .file-card-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+        .file-icon { font-size: 28px; background-color: #dcfce7; padding: 10px; border-radius: 8px; flex-shrink: 0; }
+        .file-info { display: flex; flex-direction: column; overflow: hidden; }
+        .file-title { font-size: 16px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .file-meta { font-size: 12px; color: #64748b; margin-top: 2px; }
+        .download-btn { background-color: #10b981; color: white; padding: 8px 14px; border-radius: 6px; font-size: 13px; font-weight: bold; text-decoration: none; flex-shrink: 0; }
+        .download-btn:hover { background-color: #059669; }
+
+        /* Loading Screen Overlay */
+        .loading-box { display: none; background: #fef3c7; border: 1px solid #f59e0b; color: #b45309; padding: 12px 18px; border-radius: 8px; margin-bottom: 20px; font-weight: 500; align-items: center; gap: 10px; }
+        .spinner { width: 18px; height: 18px; border: 3px solid #b45309; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Pop-up Modal Styling */
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
+        .modal-content { background: white; padding: 25px; border-radius: 8px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; position: relative; }
+        .modal-content h3 { margin-bottom: 15px; color: #1e293b; }
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #475569; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px 12px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; background-color: white; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px; }
+        .save-btn { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .cancel-btn { background: #64748b; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; height: auto; }
+            .sidebar { width: 100%; padding: 15px; flex-direction: row; align-items: center; justify-content: space-between; overflow-x: auto; }
+            .sidebar h2 { margin-bottom: 0; border-bottom: none; padding-bottom: 0; font-size: 16px; }
+            .sidebar-nav { flex-direction: row; gap: 8px; }
+            .nav-btn { padding: 8px 12px; font-size: 13px; }
+            .main-content { padding: 15px; }
+            .header-bar { flex-direction: column; align-items: flex-start; }
+            .add-btn, .fetch-btn { width: 100%; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <h2>🚀 Admin Control</h2>
+        <div class="sidebar-nav">
+            <button class="nav-btn active" onclick="showTab('market-price-tab', this)">📊 Market Price</button>
+            <button class="nav-btn" onclick="showTab('library-tab', this)">📚 Library</button>
+            <button class="nav-btn" onclick="showTab('shop-tab', this)">🏪 Shops</button>
+            <button class="nav-btn" onclick="showTab('media-tab', this)">🎬 Media</button>
+        </div>
+    </div>
+
+    <!-- Main Dynamic Content -->
+    <div class="main-content">
+
+        <!-- Flash Alert Messages -->
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+            <script>
+                alert("{{ message }}");
+            </script>
+            {% endfor %}
+        {% endif %}
+        {% endwith %}
+        
+        <!-- 0. MARKET PRICE TAB -->
+        <div id="market-price-tab" class="section active">
+            <div class="header-bar">
+                <h1>📊 Market Price Excel စာရင်းများ</h1>
+                <button class="fetch-btn" id="fetchBtn" onclick="fetchMarketPrice()">🔄 Fetch Market Price</button>
+            </div>
+
+            <div id="loadingBox" class="loading-box">
+                <div class="spinner"></div>
+                <span>Online Website မှ Scraping လုပ်နေပါသည်... ခဏစောင့်ဆိုင်းပေးပါ။</span>
+            </div>
+
+            <div class="card-grid">
+                {% for file in price_files %}
+                <div class="file-card">
+                    <div class="file-card-left">
+                        <div class="file-icon">📊</div>
+                        <div class="file-info">
+                            <div class="file-title" title="{{ file.raw_name }}">{{ file.display_name }}</div>
+                            <div class="file-meta">Excel File</div>
+                        </div>
+                    </div>
+                    <a href="/download-price/{{ file.raw_name }}" class="download-btn">Download</a>
+                </div>
+                {% else %}
+                <p style="color: #64748b; grid-column: 1/-1;">uploads/price/ ထဲတွင် Excel ဖိုင်များ မရှိသေးပါ။</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- 1. LIBRARY TAB -->
+        <div id="library-tab" class="section">
+            <div class="header-bar">
+                <h1>📚 စာအုပ်များစာရင်း (Library) - Total: {{ books|length if books else 0 }}</h1>
+                <a href="/add-book" class="add-btn">+ စာအုပ်အသစ်ထည့်ရန်</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>စာအုပ်အမည်</th>
+                            <th>Cover Image</th>
+                            <th>File Path</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if books and books|length > 0 %}
+                            {% for book in books %}
+                            <tr>
+                                <td><b>{{ book.name or 'အမည်မရှိ' }}</b></td>
+                                <td>{{ book.image_path or '-' }}</td>
+                                <td>{{ book.file_path or '-' }}</td>
+                                <td class="action-btns">
+                                    <button class="edit-btn" 
+                                            data-id="{{ book.id }}" 
+                                            data-name="{{ book.name or '' }}" 
+                                            onclick="handleEditBook(this)">Edit</button>
+                                    <a href="/delete-book/{{ book.id }}" class="delete-btn" onclick="return confirm('ဒီစာအုပ်ကို ဖျက်မှာ သေချာပါသလား?');">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 20px; color: #64748b;">
+                                    စာအုပ်ဒေတာများ မရှိသေးပါ။
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. SHOP TAB -->
+        <div id="shop-tab" class="section">
+            <div class="header-bar">
+                <h1>🏪 ဆိုင်များစာရင်း (Shops) - Total: {{ shops|length if shops else 0 }}</h1>
+                <a href="/add-shop" class="add-btn">+ ဆိုင်အသစ်ထည့်ရန်</a>
+            </div>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ဆိုင်အမည်</th>
+                            <th>အမျိုးအစား</th>
+                            <th>ဖုန်းနံပါတ်</th>
+                            <th>လိပ်စာ</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if shops and shops|length > 0 %}
+                            {% for shop in shops %}
+                            <tr>
+                                <td><b>{{ shop.name or 'အမည်မရှိ' }}</b></td>
+                                <td>{{ shop.type or '-' }}</td>
+                                <td>{{ shop.phone or '-' }}</td>
+                                <td>{{ shop.address or '-' }}</td>
+                                <td class="action-btns">
+                                    <button class="edit-btn" 
+                                            data-id="{{ shop.id }}" 
+                                            data-name="{{ shop.name or '' }}" 
+                                            data-type="{{ shop.type or '' }}" 
+                                            data-phone="{{ shop.phone or '' }}" 
+                                            data-address="{{ shop.address or '' }}" 
+                                            data-lat="{{ shop.latitude or 0.0 }}" 
+                                            data-lng="{{ shop.longitude or 0.0 }}" 
+                                            onclick="handleEditShop(this)">Edit</button>
+                                    <a href="/delete-shop/{{ shop.id }}" class="delete-btn" onclick="return confirm('ဒီဆိုင်ကို ဖျက်မှာ သေချာပါသလား?');">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="5" style="text-align:center; padding: 20px; color: #64748b;">
+                                    ဆိုင်ဒေတာများ မရှိသေးပါ။
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 3. MEDIA TAB -->
+        <div id="media-tab" class="section">
+            <div class="header-bar">
+                <h1>🎬 Media စာရင်း - Total: {{ media|length if media else 0 }}</h1>
+                <div style="display: flex; gap: 10px;">
+                    <button class="fetch-btn" id="fetchYtBtn" onclick="fetchYouTubePreview()">🔄 Fetch YouTube Preview</button>
+                    <a href="/add-media" class="add-btn">+ Media ကိုယ်တိုင်ထည့်ရန်</a>
+                </div>
+            </div>
+
+            <!-- YouTube Preview Section (Hidden by default) -->
+            <div id="ytPreviewContainer" style="display: none; background: #e2e8f0; padding: 20px; border-radius: 8px; margin-bottom: 25px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                    <h2 style="font-size: 17px; color: #0f172a;">🔍 YouTube Auto-Fetched Preview (DB ထဲ မသိမ်းရသေးပါ)</h2>
+                    <button id="saveAllBtn" onclick="saveAllPreviews()" style="background: #059669; color: white; border: none; padding: 9px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                        💾 Save All (အားလုံး DB သို့သိမ်းမည်)
+                    </button>
+                </div>
+                <div id="previewCardsList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ဖော်ပြချက်</th>
+                            <th>Link</th>
+                            <th>Type</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if media and media|length > 0 %}
+                            {% for item in media %}
+                            <tr>
+                                <td><b>{{ item.description or 'ဖော်ပြချက်မရှိ' }}</b></td>
+                                <td>
+                                    {% if item.link %}
+                                    <a href="{{ item.link }}" target="_blank">ကြည့်ရှုမည်</a>
+                                    {% else %}
+                                    -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.type == 'news' %}
+                                        <span style="padding: 3px 8px; border-radius: 4px; font-weight: bold; background: #dcfce7; color: #15803d;">news</span>
+                                    {% else %}
+                                        <span style="padding: 3px 8px; border-radius: 4px; font-weight: bold; background: #e0f2fe; color: #0369a1;">knowledge</span>
+                                    {% endif %}
+                                </td>
+                                <td class="action-btns">
+                                    <button class="edit-btn" 
+                                            data-id="{{ item.id }}" 
+                                            data-desc="{{ item.description or '' }}" 
+                                            data-link="{{ item.link or '' }}" 
+                                            data-type="{{ item.type or 'news' }}" 
+                                            onclick="handleEditMedia(this)">Edit</button>
+                                    <a href="/delete-media/{{ item.id }}" class="delete-btn" onclick="return confirm('ဒီ Media ကို ဖျက်မှာ သေချာပါသလား?');">Delete</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="4" style="text-align:center; padding: 20px; color: #64748b;">
+                                    Media ဒေတာများ မရှိသေးပါ။
+                                </td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Edit Book Modal -->
+    <div id="editBookModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ စာအုပ်ပြင်ဆင်ရန်</h3>
+            <form id="editBookForm" method="POST" action="/edit-book">
+                <input type="hidden" id="edit_book_id" name="id">
+                <div class="form-group">
+                    <label>စာအုပ်အမည်</label>
+                    <input type="text" id="edit_book_name" name="name" required>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal('editBookModal')">မလုပ်တော့ပါ</button>
+                    <button type="submit" class="save-btn">ပြင်ဆင်ချက်သိမ်းမည်</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Shop Modal -->
+    <div id="editShopModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ ဆိုင်အချက်အလက် ပြင်ဆင်ရန်</h3>
+            <form id="editShopForm" method="POST" action="/edit-shop">
+                <input type="hidden" id="edit_shop_id" name="id">
+                <div class="form-group">
+                    <label>ဆိုင်အမည်</label>
+                    <input type="text" id="edit_shop_name" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>အမျိုးအစား</label>
+                    <input type="text" id="edit_shop_type" name="type">
+                </div>
+                <div class="form-group">
+                    <label>ဖုန်းနံပါတ်</label>
+                    <input type="text" id="edit_shop_phone" name="phone">
+                </div>
+                <div class="form-group">
+                    <label>လိပ်စာ</label>
+                    <textarea id="edit_shop_address" name="address" rows="2"></textarea>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex:1;">
+                        <label>Latitude</label>
+                        <input type="text" id="edit_shop_lat" name="latitude">
+                    </div>
+                    <div class="form-group" style="flex:1;">
+                        <label>Longitude</label>
+                        <input type="text" id="edit_shop_lng" name="longitude">
+                    </div>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal('editShopModal')">မလုပ်တော့ပါ</button>
+                    <button type="submit" class="save-btn">ပြင်ဆင်ချက်သိမ်းမည်</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Media Modal -->
+    <div id="editMediaModal" class="modal">
+        <div class="modal-content">
+            <h3>✏️ Media ပြင်ဆင်ရန်</h3>
+            <form id="editMediaForm" method="POST" action="/edit-media">
+                <input type="hidden" id="edit_media_id" name="id">
+                <div class="form-group">
+                    <label>ဖော်ပြချက် (Description)</label>
+                    <textarea id="edit_media_desc" name="description" rows="3"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Link</label>
+                    <input type="text" id="edit_media_link" name="link" required>
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="edit_media_type" name="type" required>
+                        <option value="news">news</option>
+                        <option value="knowledge">knowledge</option>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" class="cancel-btn" onclick="closeModal('editMediaModal')">မလုပ်တော့ပါ</button>
+                    <button type="submit" class="save-btn">ပြင်ဆင်ချက်သိမ်းမည်</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript Handlers -->
+    <script>
+        function showTab(tabId, btnElement) {
+            document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            btnElement.classList.add('active');
+            window.location.hash = tabId; // Tab ပြောင်းတိုင်း URL Hash ကို ပြင်မည်
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Page load လုပ်ချိန်တွင် URL Hash (#media-tab စသည်) ပါလာပါက ထို Tab ဆီ တိုက်ရိုက် သွားစေရန်
+        window.addEventListener('DOMContentLoaded', () => {
+            const hash = window.location.hash;
+            if (hash) {
+                const targetTab = document.querySelector(hash);
+                const targetBtn = document.querySelector(`button[onclick*="'${hash.replace('#', '')}'"]`);
+                
+                if (targetTab && targetBtn) {
+                    document.querySelectorAll('.section').forEach(sec => sec.classList.remove('active'));
+                    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+                    
+                    targetTab.classList.add('active');
+                    targetBtn.classList.add('active');
+                }
+            }
+        });
+
+        function fetchMarketPrice() {
+            const fetchBtn = document.getElementById('fetchBtn');
+            const loadingBox = document.getElementById('loadingBox');
+
+            fetchBtn.disabled = true;
+            loadingBox.style.display = 'flex';
+
+            fetch('/fetch-market-price', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                loadingBox.style.display = 'none';
+                fetchBtn.disabled = false;
+                
+                if (data.success) {
+                    if (data.status === 'exists') {
+                        alert("ℹ️ " + data.message);
+                    } else {
+                        alert("🎉 " + data.message);
+                        window.location.reload();
+                    }
+                } else {
+                    alert("❌ အမှားဖြစ်ပွားပါသည်: " + data.message);
+                }
+            })
+            .catch(error => {
+                loadingBox.style.display = 'none';
+                fetchBtn.disabled = false;
+                alert("❌ Server Connection Error: " + error);
+            });
+        }
+
+        function fetchYouTubePreview() {
+            const btn = document.getElementById('fetchYtBtn');
+            const previewContainer = document.getElementById('ytPreviewContainer');
+            const previewList = document.getElementById('previewCardsList');
+
+            btn.disabled = true;
+            btn.innerText = "⏳ Scraping YouTube... ခဏစောင့်ပါ။";
+
+            fetch('/fetch-youtube-preview', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json())
+            .then(data => {
+                btn.disabled = false;
+                btn.innerText = "🔄 Fetch YouTube Preview";
+
+                if (data.success && data.videos.length > 0) {
+                    previewList.innerHTML = "";
+                    previewContainer.style.display = "block";
+
+                    data.videos.forEach((video, index) => {
+                        const cardHtml = `
+                            <div id="preview-card-${index}" class="preview-card-item" data-index="${index}" data-link="${video.link}" style="background: white; padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 15px; border: 1px solid #cbd5e1;">
+                                <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
+                                    <img src="${video.thumbnail}" style="width: 120px; height: 70px; object-fit: cover; border-radius: 6px;">
+                                    <div style="flex: 1;">
+                                        <input type="text" id="title-${index}" class="preview-title-input" value="${video.title}" style="width: 100%; font-weight: bold; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 5px;">
+                                        <a href="${video.link}" target="_blank" style="font-size: 12px; color: #2563eb; text-decoration: none;">▶ YouTube တွင် Preview သွားကြည့်မည်</a>
+                                    </div>
+                                </div>
+
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <select id="type-${index}" class="preview-type-select" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold;">
+                                        <option value="news" ${video.suggested_type === 'news' ? 'selected' : ''}>သတင်း (News)</option>
+                                        <option value="knowledge" ${video.suggested_type === 'knowledge' ? 'selected' : ''}>ဗဟုသုတ (Knowledge)</option>
+                                    </select>
+
+                                    <button onclick="discardPreviewCard('${index}')" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">
+                                        🗑️ ဖျက်မည်
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        previewList.insertAdjacentHTML('beforeend', cardHtml);
+                    });
+                } else {
+                    alert("ℹ️ သတင်းအသစ် ထပ်မတွေ့ရှိပါ။ (သို့မဟုတ် ရှိပြီးသား သတင်းများ ဖြစ်နေပါသည်)");
+                    previewContainer.style.display = "none";
+                }
+            })
+            .catch(err => {
+                btn.disabled = false;
+                btn.innerText = "🔄 Fetch YouTube Preview";
+                alert("❌ Error: " + err);
+            });
+        }
+
+        function discardPreviewCard(index) {
+            const card = document.getElementById(`preview-card-${index}`);
+            if (card) card.remove();
+            
+            const remainingCards = document.querySelectorAll('.preview-card-item');
+            if (remainingCards.length === 0) {
+                document.getElementById('ytPreviewContainer').style.display = 'none';
+            }
+        }
+
+        function approveAndSave(index, link) {
+            const title = document.getElementById(`title-${index}`).value;
+            const selectedType = document.getElementById(`type-${index}`).value;
+
+            fetch('/save-youtube-media', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    description: title,
+                    link: link,
+                    type: selectedType
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    alert("🎉 " + data.message);
+                    discardPreviewCard(index);
+                    window.location.reload();
+                } else {
+                    alert("❌ " + data.message);
+                }
+            })
+            .catch(err => alert("❌ Save Error: " + err));
+        }
+
+        function saveAllPreviews() {
+            const cards = document.querySelectorAll('.preview-card-item');
+            if (cards.length === 0) {
+                alert("⚠️ သိမ်းဆည်းရန် Preview Item မရှိပါ။");
+                return;
+            }
+
+            const itemsToSave = [];
+            cards.forEach(card => {
+                const index = card.getAttribute('data-index');
+                const link = card.getAttribute('data-link');
+                const title = document.getElementById(`title-${index}`).value;
+                const selectedType = document.getElementById(`type-${index}`).value;
+
+                itemsToSave.push({
+                    description: title,
+                    link: link,
+                    type: selectedType
+                });
+            });
+
+            const saveBtn = document.getElementById('saveAllBtn');
+            saveBtn.disabled = true;
+            saveBtn.innerText = "⏳ အားလုံးကို သိမ်းဆည်းနေပါသည်...";
+
+            fetch('/save-batch-youtube-media', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items: itemsToSave })
+            })
+            .then(res => res.json())
+            .then(data => {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "💾 Save All (အားလုံး DB သို့သိမ်းမည်)";
+                
+                if (data.success) {
+                    alert("🎉 " + data.message);
+                    window.location.reload();
+                } else {
+                    alert("❌ " + data.message);
+                }
+            })
+            .catch(err => {
+                saveBtn.disabled = false;
+                saveBtn.innerText = "💾 Save All (အားလုံး DB သို့သိမ်းမည်)";
+                alert("❌ Batch Save Error: " + err);
+            });
+        }
+
+        function handleEditBook(btn) {
+            document.getElementById('edit_book_id').value = btn.getAttribute('data-id') || '';
+            document.getElementById('edit_book_name').value = btn.getAttribute('data-name') || '';
+            document.getElementById('editBookModal').style.display = 'flex';
+        }
+
+        function handleEditShop(btn) {
+            document.getElementById('edit_shop_id').value = btn.getAttribute('data-id') || '';
+            document.getElementById('edit_shop_name').value = btn.getAttribute('data-name') || '';
+            document.getElementById('edit_shop_type').value = btn.getAttribute('data-type') || '';
+            document.getElementById('edit_shop_phone').value = btn.getAttribute('data-phone') || '';
+            document.getElementById('edit_shop_address').value = btn.getAttribute('data-address') || '';
+            document.getElementById('edit_shop_lat').value = btn.getAttribute('data-lat') || '0.0';
+            document.getElementById('edit_shop_lng').value = btn.getAttribute('data-lng') || '0.0';
+            document.getElementById('editShopModal').style.display = 'flex';
+        }
+
+        function handleEditMedia(btn) {
+            document.getElementById('edit_media_id').value = btn.getAttribute('data-id') || '';
+            document.getElementById('edit_media_desc').value = btn.getAttribute('data-desc') || '';
+            document.getElementById('edit_media_link').value = btn.getAttribute('data-link') || '';
+            
+            let selectedType = btn.getAttribute('data-type') || 'news';
+            if (selectedType !== 'news' && selectedType !== 'knowledge') {
+                selectedType = 'news';
+            }
+            document.getElementById('edit_media_type').value = selectedType;
+            
+            document.getElementById('editMediaModal').style.display = 'flex';
+        }
+    </script>
+</body>
+</html>

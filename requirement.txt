@@ -1,0 +1,33 @@
+# Web Framework
+Flask
+
+# gRPC & Protocol Buffers
+grpcio
+grpcio-tools
+protobuf
+
+# Database
+mysql-connector-python
+
+# Web Scraping & Data Processing
+requests
+beautifulsoup4
+pandas
+openpyxl
+
+# YouTube Media
+yt-dlp
+
+# AI / RAG
+langchain-text-splitters
+langchain-huggingface
+langchain-chroma
+sentence-transformers
+chromadb
+google-genai
+python-dotenv
+
+# Machine Learning / Image Classification
+tensorflow
+scikit-learn
+numpy
