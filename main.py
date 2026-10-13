@@ -1,6 +1,7 @@
 
 import json
 from pathlib import Path
+import re
 
 from flask import (
     Flask,
@@ -67,6 +68,7 @@ EXCEL_EXTENSIONS = {".xlsx", ".xls", ".xlsm"}
 # --------------------------------------------------
 
 
+
 def get_price_files():
     if not PRICE_FOLDER.is_dir():
         return []
@@ -77,11 +79,41 @@ def get_price_files():
         if not file.is_file():
             continue
 
-        if file.suffix.lower() in EXCEL_EXTENSIONS:
-            files.append(file.name)
+        if file.suffix.lower() not in EXCEL_EXTENSIONS:
+            continue
 
-    # Myanmar Unicode filenames are preserved.
-    return sorted(files, key=str.casefold)
+        # Original filename for downloading
+        raw_name = file.name
+
+        # Remove extension
+        name = file.stem
+
+        # Extract month and day from the filename
+        # Example:
+        # 001_Market_Price_၂၀၂၆*ခုနှစ်_ဇူလိုင်လ_၀၈*
+        match = re.search(
+            r"_(.+လ)_(\d{2})\*?$",
+            name
+        )
+
+        if match:
+            month = match.group(1)
+            day = match.group(2)
+            display_name = f"{month} {day} ရက်"
+        else:
+            # Fallback if the filename format differs
+            display_name = name
+
+        files.append({
+            "raw_name": raw_name,
+            "display_name": display_name,
+        })
+
+    return sorted(
+        files,
+        key=lambda item: item["raw_name"],
+        reverse=True,
+    )
 
 
 
