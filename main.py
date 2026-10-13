@@ -20,8 +20,9 @@ from storage import list_records
 # PATHS
 # =========================================================
 
+
 BASE_DIR = Path(__file__).resolve().parent
-DATA_DIR = BASE_DIR / "data"
+DATA_DIR = BASE_DIR / "public" / "data"
 
 if os.environ.get("VERCEL") == "1":
     UPLOAD_FOLDER = Path("/tmp/uploads")
@@ -31,6 +32,7 @@ else:
 PRICE_FOLDER = UPLOAD_FOLDER / "price"
 
 ALLOWED_COLLECTIONS = {"books", "shops", "media"}
+
 
 
 # =========================================================

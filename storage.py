@@ -1,10 +1,8 @@
 
-import json
 from pathlib import Path
+import json
 
 BASE_DIR = Path(__file__).resolve().parent
-
-# JSON files are inside public/data/
 DATA_DIR = BASE_DIR / "public" / "data"
 
 JSON_FILES = {
@@ -14,14 +12,11 @@ JSON_FILES = {
 }
 
 
-def _get_path(collection):
+def _read_all(collection):
     if collection not in JSON_FILES:
         raise ValueError(f"Unknown collection: {collection}")
-    return JSON_FILES[collection]
 
-
-def _read_all(collection):
-    path = _get_path(collection)
+    path = JSON_FILES[collection]
 
     if not path.is_file():
         raise FileNotFoundError(
@@ -36,19 +31,7 @@ def _read_all(collection):
             f"{path.name} must contain a JSON array"
         )
 
-    if not all(isinstance(item, dict) for item in data):
-        raise ValueError(
-            f"{path.name} must contain JSON objects"
-        )
-
     return data
-
-
-def _safe_int(value):
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
 
 
 def list_records(collection, include_deleted=False):
@@ -62,7 +45,7 @@ def list_records(collection, include_deleted=False):
 
     return sorted(
         records,
-        key=lambda record: _safe_int(record.get("id")),
+        key=lambda record: int(record.get("id", 0)),
         reverse=True,
     )
 
@@ -71,4 +54,5 @@ def get_record(collection, record_id):
     for record in list_records(collection):
         if str(record.get("id")) == str(record_id):
             return record
+
     return None
