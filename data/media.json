@@ -4,7 +4,7 @@
     "id": 1,
     "title": "စပါးဧကသောင်းချီ ရေနစ်မြုပ်လို့ စားဝတ်နေရေးအတွက် ပြည်သူတွေ စိုးရိမ် - DVB News",
     "url": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
-    "category": "news",
+    "type": "news",
     "created_at": "2026-08-16 19:37:24",
     "updated_at": "2026-08-23 16:09:32",
     "deleted_at": "2026-08-23 16:09:32"
@@ -13,7 +13,7 @@
     "id": 2,
     "title": "adajhj",
     "url": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-16 21:37:57",
     "updated_at": "2026-08-23 15:52:52",
     "deleted_at": "2026-08-23 15:52:52"
@@ -22,7 +22,7 @@
     "id": 3,
     "title": "fkajkd",
     "url": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
-    "category": "news",
+    "type": "news",
     "created_at": "2026-08-16 21:38:07",
     "updated_at": "2026-08-23 15:52:30",
     "deleted_at": "2026-08-23 15:52:30"
@@ -31,7 +31,7 @@
     "id": 4,
     "title": "djlalksd",
     "url": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-16 21:38:16",
     "updated_at": "2026-08-23 15:52:23",
     "deleted_at": "2026-08-23 15:52:23"
@@ -40,7 +40,7 @@
     "id": 5,
     "title": "ဂျင်း စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=O0LghTSrsG0",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:36:50",
     "updated_at": "2026-08-23 15:36:50",
     "deleted_at": null
@@ -49,7 +49,7 @@
     "id": 6,
     "title": "ခရမ်းသီး စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=dWNOKVwcvpI",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:50:03",
     "updated_at": "2026-08-23 15:50:03",
     "deleted_at": null
@@ -58,7 +58,7 @@
     "id": 7,
     "title": "ကြက်သွန်ဖြူမြိတ် စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=p7_F2LzECyQ",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -67,7 +67,7 @@
     "id": 8,
     "title": "ဗိုလ်စားပဲစိုက်နည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=T21QvD1lbUw",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -76,7 +76,7 @@
     "id": 9,
     "title": "ငှက်ပျောပင်စိုက်ပျိုးနည်းအကြောင်း",
     "url": "https://www.youtube.com/watch?v=oOl4i8jBWWA",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -85,7 +85,7 @@
     "id": 10,
     "title": "စတော်ဘယ်ရီသီး စိုက်ပျိုးနည်း",
     "url": "https://www.youtube.com/watch?v=2EsY53rTYjc",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -94,7 +94,7 @@
     "id": 11,
     "title": "ရုံးပတေသီး စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=s9RdHBa1cgo",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -103,7 +103,7 @@
     "id": 12,
     "title": "ကန်စွန်းဥ စိုက်ပျိုးနည်းအကြောင်း",
     "url": "https://www.youtube.com/watch?v=dbBcMa7IChY",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -112,7 +112,7 @@
     "id": 13,
     "title": "ခရမ်းကျွတ်သီး စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=JRziBsOo5ps",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -121,7 +121,7 @@
     "id": 14,
     "title": "ကြက်သွန်မြိတ် စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=E1-TyhqB33w",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -130,7 +130,7 @@
     "id": 15,
     "title": "ဂေါ်ဖီထုပ် စိုက်ပျိုးနည်းအကြောင်း",
     "url": "https://www.youtube.com/watch?v=qAm_NZ9Bh6E",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -139,7 +139,7 @@
     "id": 16,
     "title": "ကန်စွန်းရွက် စိုက်ပျိုးနည်း အကြောင်း",
     "url": "https://www.youtube.com/watch?v=R1MJFux3RD8",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
     "updated_at": "2026-08-23 15:52:12",
     "deleted_at": null
@@ -148,7 +148,7 @@
     "id": 17,
     "title": "ရန်ကင်းက မခင်ကင်းစင်ရဲ့ ကားတာယာထဲ ဆလပ်ရွက်စိုက်နည်းတဲ့။ ယူတတ်ရင်ပညာကြီးပဲ",
     "url": "https://www.youtube.com/watch?v=FquKGPFymX4",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -157,7 +157,7 @@
     "id": 18,
     "title": "မြေနေရာမရှိသူများအတွက် ကိုယ့်တိုက်ခန်းထဲမှာတင် သီးပင်စားပင်စိုက်နည်းပြခဲ့တဲ့ မစိမ်းမို...",
     "url": "https://www.youtube.com/watch?v=HfdtEdls8-Y",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -166,7 +166,7 @@
     "id": 19,
     "title": "သူ့စိုက်နည်းနဲ့ဆို ငှက်ပျောတစ်ပင်သီးနှုန်းက သာမန်ငှက်ပျောတစ်ခြံသီးနှုန်းနဲ့ညီစေရမယ်ဆို...",
     "url": "https://www.youtube.com/watch?v=nuJt1IpHNqA",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -175,7 +175,7 @@
     "id": 20,
     "title": "တစ်လကို ဆယ်သိန်းရတဲ့ ငွေနှင်းမှိုစိုက်နည်းကို ပြခဲ့တဲ့အစ်ကို",
     "url": "https://www.youtube.com/watch?v=ZW78T1cnjOc",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -184,7 +184,7 @@
     "id": 21,
     "title": "ပေါင်းအိုးကိုလွှတ်မပစ်ဘဲ ပလတ်စတစ်ကနေဓါတ်ဆီထုတ်နည်းပြခဲ့တဲ့ မြင်းခြံက ကျော်သီဟ",
     "url": "https://www.youtube.com/watch?v=qt9QIdLQ4Zk",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -193,7 +193,7 @@
     "id": 22,
     "title": "သဘာဝတရားရဲ့ နိယာမကိုအသုံးချပြီး မကုန်ခန်းနိုင်တဲ့လျှပ်စစ်ထုတ်နည်းပြခဲ့တဲ့ မြင်းခြံက သိန...",
     "url": "https://www.youtube.com/watch?v=0b7zOSUCvmc",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -202,7 +202,7 @@
     "id": 23,
     "title": "သံပုရာသီးကို အာလူးသုံးပြီး ဆယ်ဆပိုသီးအောင်စိုက်နည်းပြခဲ့တဲ့ ဧရာဝတီတိုင်းက ဦးစိုးမြင့်",
     "url": "https://www.youtube.com/watch?v=VSPphkfMsFc",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -211,7 +211,7 @@
     "id": 24,
     "title": "နိုင်ငံခြားက ဈေးကြီးပေးရတဲ့သစ်သီးဖျော်စက်ကို အိမ်မှာတင်လုပ်နည်းပြခဲ့တဲ့ ကိုညီညီ",
     "url": "https://www.youtube.com/watch?v=5WN2aekRRYg",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -220,7 +220,7 @@
     "id": 25,
     "title": "အိမ်ရှေ့ဝရံတာမှာတင် တစ်လတစ်သိန်းပုံမှန်ရတဲ့ ကန်စွန်းခင်းစိုက်နည်းပြခဲ့တဲ့ ရန်ကင်းက ကိုန...",
     "url": "https://www.youtube.com/watch?v=qQGYP2-nDzw",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -229,7 +229,7 @@
     "id": 26,
     "title": "ပလတ်စတစ်ခြင်းသုံးပြီး ကိုယ့်အိမ်ထဲမှာတင် သခွါးသီးရှယ်သီးအောင်စိုက်နည်းပြခဲ့တဲ့ ကိုညီညီ",
     "url": "https://www.youtube.com/watch?v=7rMc7gFphFs",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -238,7 +238,7 @@
     "id": 27,
     "title": "ကိုယ့်အိမ်ခန်းထဲမှာတင် ကောက်ရိုးမှိုစိုက်နည်းပြခဲ့တဲ့ မြေနီကုန်းက ကိုထက်နိုင်",
     "url": "https://www.youtube.com/watch?v=t6CXr15fWUA",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -247,7 +247,7 @@
     "id": 28,
     "title": "မြေနေရာအကျယ်မလို ကိုယ့်အိမ်ထဲမှာတင် ပလတ်စတစ်အိတ်နဲ့ခရမ်းသီးစိုက်နည်းပြခဲ့တဲ့ မကွေးက ကို...",
     "url": "https://www.youtube.com/watch?v=WdK7vLouTDY",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -256,7 +256,7 @@
     "id": 29,
     "title": "သဘာဝနည်းလမ်းတွေသုံးပြီး ပဲသီးကိုရှယ်သီးအောင်စိုက်နည်းပြခဲ့တဲ့ မြောင်းမြက ကိုရန်နိုင်လင...",
     "url": "https://www.youtube.com/watch?v=P3yX2sWYPl4",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
@@ -265,16 +265,17 @@
     "id": 30,
     "title": "ကိုယ့်အိမ်ခြံဝင်းထဲမှာတင် သခွါးဖရုံစိုက်နည်းပြခဲ့တဲ့ မြောင်းမြမြို့က ကိုသီလ",
     "url": "https://www.youtube.com/watch?v=Re0i3297Ro8",
-    "category": "knowledge",
+    "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
     "updated_at": "2026-08-23 19:52:46",
     "deleted_at": null
   },
+[
   {
     "id": 31,
     "title": "LITTLE BIG - I'M OK (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=Q4W3i8r9d1k",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -283,7 +284,7 @@
     "id": 32,
     "title": "Sia - Unstoppable (Official Video)",
     "url": "https://www.youtube.com/watch?v=YaEG2aWJnZ8",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -292,7 +293,7 @@
     "id": 33,
     "title": "Imagine Dragons - Believer (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=7wtfhZwyrcc",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -301,7 +302,7 @@
     "id": 34,
     "title": "The Weeknd - Blinding Lights (Official Video)",
     "url": "https://www.youtube.com/watch?v=4NRXx6U8ABQ",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -310,7 +311,7 @@
     "id": 35,
     "title": "Dua Lipa - Levitating (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=TUVcZfQe-Kw",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -319,7 +320,7 @@
     "id": 36,
     "title": "Alan Walker - Faded (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=60ItHLz5WEA",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -328,7 +329,7 @@
     "id": 37,
     "title": "Adele - Hello (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=YQHsXMglC9A",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -337,7 +338,7 @@
     "id": 38,
     "title": "Ed Sheeran - Shape of You (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=JGwWNGJdvx8",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -346,18 +347,19 @@
     "id": 39,
     "title": "Coldplay - Hymn For The Weekend (Official Video)",
     "url": "https://www.youtube.com/watch?v=YykjpeuMNEk",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
   },
   {
     "id": 40,
-    "title": "Maroon 5 - Sugar (Official Music Video)",
+    "description": "Maroon 5 - Sugar (Official Music Video)",
     "url": "https://www.youtube.com/watch?v=09R8_2nJtjg",
-    "category": "music",
+    "type": "music",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
-  }  
+  }
+]  
 ]
