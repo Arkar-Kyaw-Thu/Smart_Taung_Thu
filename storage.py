@@ -3,15 +3,15 @@ import json
 import os
 import threading
 from datetime import datetime, timezone
+from storage import list_records
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Vercel allows temporary writes under /tmp.
 # Local development continues using public/data.
-if os.environ.get("VERCEL"):
-    DATA_DIR = "/tmp/data"
-else:
-    DATA_DIR = os.path.join(BASE_DIR, "public", "data")
+
+DATA_DIR = os.path.join(BASE_DIR, "public", "data")
 
 JSON_FILES = {
     "books": os.path.join(DATA_DIR, "books.json"),
@@ -107,28 +107,14 @@ def _same_id(record, record_id):
     return str(record.get("id")) == str(record_id)
 
 
-def list_records(collection, include_deleted=False):
-    """
-    Return records ordered by ID descending.
 
-    By default, records with a non-empty delete_at field are hidden,
-    matching the previous dashboard's soft-delete behavior.
-    """
-    with _STORAGE_LOCK:
-        records = _read_all(collection)
+def load_records(collection):
+    """Read records through the existing storage module."""
 
-        if not include_deleted:
-            records = [
-                record
-                for record in records
-                if not record.get("delete_at")
-            ]
+    if collection not in ("books", "shops", "media"):
+        raise ValueError("Unknown collection")
 
-        return sorted(
-            records,
-            key=lambda record: _safe_int(record.get("id")),
-            reverse=True,
-        )
+    return list_records(collection)
 
 
 def get_record(collection, record_id):
