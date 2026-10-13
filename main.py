@@ -31,7 +31,7 @@ from storage import (
     restore_record,
 )
 
-from service.media_service import MarketPriceService 
+from service.media_service import MediaService 
 
 
 # =========================================================
@@ -451,7 +451,7 @@ def download_price(filename):
 def refresh_price():
     try:
         filepath, filename = (
-            MarketPriceService.fetch_and_save_excel()
+            MediaService.fetch_and_save_excel()
         )
 
         if not filepath or not filename:
