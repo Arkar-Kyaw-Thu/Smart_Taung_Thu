@@ -66,16 +66,23 @@ EXCEL_EXTENSIONS = {".xlsx", ".xls", ".xlsm"}
 # Do not create folders or write files
 # --------------------------------------------------
 
+
 def get_price_files():
     if not PRICE_FOLDER.is_dir():
         return []
 
-    return sorted(
-        file.name
-        for file in PRICE_FOLDER.iterdir()
-        if file.is_file()
-        and file.suffix.lower() in EXCEL_EXTENSIONS
-    )
+    files = []
+
+    for file in PRICE_FOLDER.iterdir():
+        if not file.is_file():
+            continue
+
+        if file.suffix.lower() in EXCEL_EXTENSIONS:
+            files.append(file.name)
+
+    # Myanmar Unicode filenames are preserved.
+    return sorted(files, key=str.casefold)
+
 
 
 # --------------------------------------------------
