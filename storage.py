@@ -6,8 +6,12 @@ from datetime import datetime, timezone
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# JSON data files
-DATA_DIR = os.path.join(BASE_DIR, "public", "data")
+# Vercel allows temporary writes under /tmp.
+# Local development continues using public/data.
+if os.environ.get("VERCEL"):
+    DATA_DIR = "/tmp/data"
+else:
+    DATA_DIR = os.path.join(BASE_DIR, "public", "data")
 
 JSON_FILES = {
     "books": os.path.join(DATA_DIR, "books.json"),
