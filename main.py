@@ -11,7 +11,9 @@ from flask import (
     send_from_directory,
     abort,
     url_for,
+    redirect,
 )
+from werkzeug.utils import secure_filename
 
 from storage import (
     BASE_DIR,
@@ -31,11 +33,11 @@ from storage import (
     restore_record,
 )
 
-from service.media_service import MediaService 
+from service.media_service import MediaService
 
 
 # =========================================================
-# Flask configuration
+# Flask Configuration
 # =========================================================
 
 app = Flask(
@@ -52,9 +54,8 @@ logger = logging.getLogger(__name__)
 
 ALLOWED_COLLECTIONS = {"books", "shops", "media"}
 EXCEL_EXTENSIONS = {".xlsx", ".xls", ".xlsm"}
-
-# Database မသုံးပါ။ Data အားလုံးကို JSON ဖိုင်များတွင် သိမ်းမည်။
-# Market price များကို uploads/price/ ထဲ Excel ဖိုင်အဖြစ် သိမ်းမည်။
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".gif", ".webp"}
+BOOK_EXTENSIONS = {".pdf", ".epub"}
 
 
 # =========================================================
@@ -70,7 +71,6 @@ def error_response(message, status_code=400):
 
 def get_request_data():
     """Request body မှ JSON object ကို ရယူမည်။"""
-
     data = request.get_json(silent=True)
 
     if not isinstance(data, dict):
@@ -79,16 +79,15 @@ def get_request_data():
     return data
 
 
+def validate_collection(collection):
+    return (
+        collection in ALLOWED_COLLECTIONS
+        and collection in JSON_FILES
+    )
+
+
 def get_price_files():
-    """
-    uploads/price/ ထဲရှိ Excel ဖိုင်များကို ရှာမည်။
-
-    Display:
-        ဇူလိုင်လ ၀၈ ရက်
-
-    Download:
-        မူရင်းဖိုင်အမည်အတိုင်း download လုပ်မည်။
-    """
+    """Excel ဖိုင်နာမည်မှ မြန်မာလနှင့် ရက်ကို ထုတ်ယူမည်။"""
 
     if not PRICE_DIR.is_dir():
         return []
@@ -111,16 +110,17 @@ def get_price_files():
         raw_name = file_path.name
         stem = file_path.stem
 
-        # ဥပမာ:
-        # 001_Market_Price_၂၀၂၆_ခုနှစ်_ဇူလိုင်လ_၀၈
         match = re.search(
-            rf"{month_pattern}[_\s]+([၀-၉0-9]{{1,2}})\*?$",
+            rf"{month_pattern}[_\s-]*([၀-၉0-9]{{1,2}})_*$",
             stem,
         )
 
         if match:
             month = match.group(1)
-            day = match.group(2).translate(
+            day = match.group(2)
+
+            # အင်္ဂလိပ်ဂဏန်းကို မြန်မာဂဏန်းပြောင်းမည်
+            day = day.translate(
                 str.maketrans("0123456789", "၀၁၂၃၄၅၆၇၈၉")
             )
 
@@ -129,7 +129,6 @@ def get_price_files():
 
             display_name = f"{month} {day} ရက်"
         else:
-            # ရက်စွဲမတွေ့လျှင် ဖိုင်အမည်အပြည့် မပြပါ။
             display_name = "ဈေးနှုန်းဖိုင်"
 
         files.append({
@@ -144,36 +143,254 @@ def get_price_files():
     )
 
 
-def validate_collection(collection):
-    if collection not in ALLOWED_COLLECTIONS:
-        return False
+def save_uploaded_file(upload, target_dir, allowed_extensions):
+    """
+    Upload ဖိုင်ကို သတ်မှတ်ထားသော folder ထဲ သိမ်းမည်။
+    သိမ်းထားသော filename ကိုသာ ပြန်ပေးမည်။
+    """
 
-    return collection in JSON_FILES
+    if upload is None or not upload.filename:
+        return None
+
+    original_name = upload.filename
+    extension = Path(original_name).suffix.lower()
+
+    if extension not in allowed_extensions:
+        raise ValueError(
+            f"Unsupported file type: {extension or 'unknown'}"
+        )
+
+    filename = secure_filename(original_name)
+
+    if not filename:
+        raise ValueError("Invalid filename.")
+
+    target_dir = Path(target_dir)
+    target_dir.mkdir(parents=True, exist_ok=True)
+
+    # ရှိပြီးသားဖိုင်ကို မတော်တဆ overwrite မဖြစ်စေရန်
+    destination = target_dir / filename
+
+    if destination.exists():
+        stem = Path(filename).stem
+        suffix = Path(filename).suffix
+        counter = 1
+
+        while destination.exists():
+            filename = f"{stem}_{counter}{suffix}"
+            destination = target_dir / filename
+            counter += 1
+
+    upload.save(str(destination))
+
+    return filename
+
+
+def uploaded_relative_path(folder_name, filename):
+    """ /files/<folder>/<filename> အတွက် relative path ပြန်ပေးမည်။"""
+    if not filename:
+        return None
+
+    return f"{folder_name}/{filename}"
+
+
+def render_add_page(page_type):
+    """သက်ဆိုင်ရာ HTML template ကို ဖွင့်မည်။"""
+
+    templates = {
+        "book": "add_book.html",
+        "shop": "add_shop.html",
+        "media": "add_media.html",
+    }
+
+    template_name = templates.get(page_type)
+
+    if template_name is None:
+        abort(404)
+
+    template_path = BASE_DIR / "templates" / template_name
+
+    if not template_path.is_file():
+        logger.error("Template not found: %s", template_path)
+        abort(404)
+
+    return render_template(template_name)
 
 
 # =========================================================
 # Dashboard
+# GET /
 # =========================================================
 
-@app.route("/")
+@app.route("/", methods=["GET"])
 def index():
-    """Main dashboard."""
-
-    price_files = get_price_files()
     status = data_status()
+
+    books = list_records("books")
+    shops = list_records("shops")
+    media = list_records("media")
 
     return render_template(
         "index.html",
-        price_files=price_files,
+        price_files=get_price_files(),
         data_status=status,
-        books_count=status.get("books", {}).get("active_count", 0),
-        shops_count=status.get("shops", {}).get("active_count", 0),
-        media_count=status.get("media", {}).get("active_count", 0),
+        books=books,
+        shops=shops,
+        media=media,
+        books_count=len(books),
+        shops_count=len(shops),
+        media_count=len(media),
     )
 
 
 # =========================================================
-# Health check
+# Add Book
+# GET /add-book
+# POST /add-book
+# Also supports /add_book
+# =========================================================
+
+@app.route(
+    "/add-book",
+    methods=["GET", "POST"],
+    endpoint="add_book",
+)
+@app.route("/add_book", methods=["GET", "POST"])
+def add_book():
+    if request.method == "GET":
+        return render_add_page("book")
+
+    name = request.form.get("name", "").strip()
+
+    if not name:
+        return "စာအုပ်အမည် ထည့်ပေးပါ။", 400
+
+    image_name = None
+    book_filename = None
+
+    try:
+        image_name = save_uploaded_file(
+            request.files.get("image"),
+            BOOK_COVER_DIR,
+            IMAGE_EXTENSIONS,
+        )
+
+        book_filename = save_uploaded_file(
+            request.files.get("file"),
+            BOOK_PDF_DIR,
+            BOOK_EXTENSIONS,
+        )
+
+        record = {
+            "name": name,
+            "image": uploaded_relative_path(
+                "book_cover",
+                image_name,
+            ),
+            "file": uploaded_relative_path(
+                "book_pdf",
+                book_filename,
+            ),
+        }
+
+        create_record("books", record)
+
+        logger.info("Book created: %s", name)
+
+        return redirect(url_for("index"))
+
+    except ValueError as exc:
+        # Invalid extension or filename
+        return str(exc), 400
+
+    except (OSError, TypeError):
+        logger.exception("Could not add book")
+        return "စာအုပ်သိမ်းဆည်းရာတွင် အမှားဖြစ်နေပါသည်။", 500
+
+
+# =========================================================
+# Add Shop
+# GET /add-shop
+# POST /add-shop
+# Also supports /add_shop
+# =========================================================
+
+@app.route(
+    "/add-shop",
+    methods=["GET", "POST"],
+    endpoint="add_shop",
+)
+@app.route("/add_shop", methods=["GET", "POST"])
+def add_shop():
+    if request.method == "GET":
+        return render_add_page("shop")
+
+    data = {
+        key: value.strip()
+        for key, value in request.form.items()
+    }
+
+    if not any(data.values()):
+        return "ဆိုင်အချက်အလက် ထည့်ပေးပါ။", 400
+
+    try:
+        create_record("shops", data)
+
+        logger.info("Shop created")
+
+        return redirect(url_for("index") + "#shops")
+
+    except ValueError as exc:
+        return str(exc), 400
+
+    except (OSError, TypeError):
+        logger.exception("Could not add shop")
+        return "ဆိုင်အချက်အလက် သိမ်းဆည်းရာတွင် အမှားဖြစ်နေပါသည်။", 500
+
+
+# =========================================================
+# Add Media
+# GET /add-media
+# POST /add-media
+# Also supports /add_media
+# =========================================================
+
+@app.route(
+    "/add-media",
+    methods=["GET", "POST"],
+    endpoint="add_media",
+)
+@app.route("/add_media", methods=["GET", "POST"])
+def add_media():
+    if request.method == "GET":
+        return render_add_page("media")
+
+    data = {
+        key: value.strip()
+        for key, value in request.form.items()
+    }
+
+    if not any(data.values()):
+        return "Media အချက်အလက် ထည့်ပေးပါ။", 400
+
+    try:
+        create_record("media", data)
+
+        logger.info("Media record created")
+
+        return redirect(url_for("index") + "#media")
+
+    except ValueError as exc:
+        return str(exc), 400
+
+    except (OSError, TypeError):
+        logger.exception("Could not add media")
+        return "Media အချက်အလက် သိမ်းဆည်းရာတွင် အမှားဖြစ်နေပါသည်။", 500
+
+
+# =========================================================
+# Health Check
+# GET /api/health
 # =========================================================
 
 @app.route("/api/health", methods=["GET"])
@@ -194,7 +411,7 @@ def health():
 
 
 # =========================================================
-# READ: List all records
+# READ: List Records
 # GET /api/books
 # GET /api/shops
 # GET /api/media
@@ -223,13 +440,13 @@ def api_list_records(collection):
             "data": records,
         })
 
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError):
         logger.exception("Could not read collection %s", collection)
-        return error_response(str(exc), 500)
+        return error_response("Could not read records.", 500)
 
 
 # =========================================================
-# CREATE: Add a record
+# CREATE: Add Record through JSON API
 # POST /api/books
 # POST /api/shops
 # POST /api/media
@@ -266,10 +483,8 @@ def api_create_record(collection):
 
 
 # =========================================================
-# READ: Get one record
-# GET /api/books/1
-# GET /api/shops/1
-# GET /api/media/1
+# READ: Get One Record
+# GET /api/books/<record_id>
 # =========================================================
 
 @app.route("/api/<collection>/<record_id>", methods=["GET"])
@@ -297,16 +512,15 @@ def api_get_record(collection, record_id):
             "data": record,
         })
 
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError):
         logger.exception("Could not get record")
-        return error_response(str(exc), 500)
+        return error_response("Could not retrieve record.", 500)
 
 
 # =========================================================
-# UPDATE: Edit a record
-# PUT /api/books/1
-# PUT /api/shops/1
-# PUT /api/media/1
+# UPDATE: Edit Record
+# PUT /api/books/<record_id>
+# PATCH /api/books/<record_id>
 # =========================================================
 
 @app.route(
@@ -326,11 +540,7 @@ def api_update_record(collection, record_id):
         )
 
     try:
-        record = update_record(
-            collection,
-            record_id,
-            data,
-        )
+        record = update_record(collection, record_id, data)
 
         if record is None:
             return error_response("Record not found.", 404)
@@ -350,10 +560,8 @@ def api_update_record(collection, record_id):
 
 
 # =========================================================
-# DELETE: Soft delete a record
-# DELETE /api/books/1
-# DELETE /api/shops/1
-# DELETE /api/media/1
+# DELETE: Soft Delete Record
+# DELETE /api/books/<record_id>
 # =========================================================
 
 @app.route(
@@ -365,10 +573,7 @@ def api_delete_record(collection, record_id):
         return error_response("Collection not found.", 404)
 
     try:
-        deleted = delete_record(
-            collection,
-            record_id,
-        )
+        deleted = delete_record(collection, record_id)
 
         if not deleted:
             return error_response("Record not found.", 404)
@@ -379,16 +584,14 @@ def api_delete_record(collection, record_id):
             "id": record_id,
         })
 
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError):
         logger.exception("Could not delete record")
-        return error_response(str(exc), 500)
+        return error_response("Could not delete record.", 500)
 
 
 # =========================================================
-# RESTORE: Restore a soft-deleted record
-# POST /api/books/1/restore
-# POST /api/shops/1/restore
-# POST /api/media/1/restore
+# RESTORE: Restore Deleted Record
+# POST /api/books/<record_id>/restore
 # =========================================================
 
 @app.route(
@@ -400,10 +603,7 @@ def api_restore_record(collection, record_id):
         return error_response("Collection not found.", 404)
 
     try:
-        restored = restore_record(
-            collection,
-            record_id,
-        )
+        restored = restore_record(collection, record_id)
 
         if not restored:
             return error_response(
@@ -417,9 +617,9 @@ def api_restore_record(collection, record_id):
             "id": record_id,
         })
 
-    except (ValueError, OSError) as exc:
+    except (ValueError, OSError):
         logger.exception("Could not restore record")
-        return error_response(str(exc), 500)
+        return error_response("Could not restore record.", 500)
 
 
 # =========================================================
@@ -427,17 +627,26 @@ def api_restore_record(collection, record_id):
 # GET /download-price/<filename>
 # =========================================================
 
-@app.route("/download-price/<path:filename>", methods=["GET"])
+@app.route(
+    "/download-price/<path:filename>",
+    methods=["GET"],
+)
 def download_price(filename):
-    if Path(filename).suffix.lower() not in EXCEL_EXTENSIONS:
+    safe_name = Path(filename).name
+
+    if safe_name != filename:
         abort(404)
 
-    if not (PRICE_DIR / filename).is_file():
+    if Path(safe_name).suffix.lower() not in EXCEL_EXTENSIONS:
+        abort(404)
+
+    if not (PRICE_DIR / safe_name).is_file():
+        logger.warning("Price file not found: %s", safe_name)
         abort(404)
 
     return send_from_directory(
         str(PRICE_DIR),
-        filename,
+        safe_name,
         as_attachment=True,
     )
 
@@ -450,9 +659,7 @@ def download_price(filename):
 @app.route("/api/refresh-price", methods=["POST"])
 def refresh_price():
     try:
-        filepath, filename = (
-            MediaService.fetch_and_save_excel()
-        )
+        filepath, filename = MediaService.fetch_and_save_excel()
 
         if not filepath or not filename:
             return error_response(
@@ -472,34 +679,36 @@ def refresh_price():
 
     except Exception:
         logger.exception("Market price refresh failed")
-        return error_response(
-            "Market price refresh failed.",
-            500,
-        )
+        return error_response("Market price refresh failed.", 500)
 
 
 # =========================================================
-# Uploaded files
-# GET /files/book_cover/book1.jpg
-# GET /files/book_pdf/book1.pdf
+# Uploaded Files
+# GET /files/book_cover/<filename>
+# GET /files/book_pdf/<filename>
 # =========================================================
 
 @app.route("/files/<path:filename>", methods=["GET"])
 def uploaded_file(filename):
-    file_path = UPLOAD_DIR / filename
+    # Reject absolute paths and traversal outside UPLOAD_DIR.
+    root = UPLOAD_DIR.resolve()
+    file_path = (root / filename).resolve()
+
+    if not file_path.is_relative_to(root):
+        abort(404)
 
     if not file_path.is_file():
         abort(404)
 
     return send_from_directory(
-        str(UPLOAD_DIR),
-        filename,
+        str(file_path.parent),
+        file_path.name,
         as_attachment=False,
     )
 
 
 # =========================================================
-# Debug paths
+# Debug Paths
 # GET /api/debug-paths
 # =========================================================
 
@@ -539,7 +748,7 @@ def debug_paths():
 
 
 # =========================================================
-# Error handlers
+# Error Handlers
 # =========================================================
 
 @app.errorhandler(404)
@@ -559,7 +768,7 @@ def method_not_allowed(_error):
 
 
 # =========================================================
-# Run server
+# Run Server
 # =========================================================
 
 if __name__ == "__main__":

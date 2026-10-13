@@ -1,1 +1,11 @@
-[]
+[
+  {
+    "description": "as",
+    "link": "as",
+    "type": "news",
+    "id": 1,
+    "create_at": "2026-10-13 21:43:35",
+    "update_at": "2026-10-13 21:43:35",
+    "delete_at": null
+  }
+]
