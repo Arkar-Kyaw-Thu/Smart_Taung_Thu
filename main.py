@@ -21,15 +21,12 @@ from storage import list_records
 # =========================================================
 
 BASE_DIR = Path(__file__).resolve().parent
+DATA_DIR = BASE_DIR / "data"
 
-# JSON files are expected inside public/data.
-DATA_DIR = BASE_DIR / "public" / "data"
-
-UPLOAD_FOLDER = (
-    Path("/tmp/uploads")
-    if os.environ.get("VERCEL") == "1"
-    else BASE_DIR / "public" / "uploads"
-)
+if os.environ.get("VERCEL") == "1":
+    UPLOAD_FOLDER = Path("/tmp/uploads")
+else:
+    UPLOAD_FOLDER = BASE_DIR / "public" / "uploads"
 
 PRICE_FOLDER = UPLOAD_FOLDER / "price"
 
@@ -55,7 +52,6 @@ app.json.ensure_ascii = False
 app.config["MAX_CONTENT_LENGTH"] = 50 * 1024 * 1024
 
 
-# Upload directories are separate from read-only JSON data.
 try:
     UPLOAD_FOLDER.mkdir(parents=True, exist_ok=True)
     PRICE_FOLDER.mkdir(parents=True, exist_ok=True)
@@ -146,7 +142,7 @@ def health():
 
 
 # =========================================================
-# FLUTTER READ-ONLY API
+# FLUTTER READ-ONLY COLLECTION API
 # =========================================================
 
 @app.route("/api/<collection>", methods=["GET"])
@@ -168,13 +164,21 @@ def get_collection(collection):
             "Failed to read collection: %s",
             collection,
         )
+
         return json_error(
             f"Unable to read {collection} data",
             500,
         )
 
 
-@app.route("/api/<collection>/<record_id>", methods=["GET"])
+# =========================================================
+# FLUTTER READ-ONLY SINGLE RECORD API
+# =========================================================
+
+@app.route(
+    "/api/<collection>/<record_id>",
+    methods=["GET"],
+)
 def get_single_record(collection, record_id):
     if collection not in ALLOWED_COLLECTIONS:
         return json_error("Unknown collection", 404)
@@ -197,20 +201,22 @@ def get_single_record(collection, record_id):
             collection,
             record_id,
         )
+
         return json_error("Unable to read record", 500)
 
 
 # =========================================================
-# TEMPORARY DIAGNOSTIC ENDPOINT
-# Remove after troubleshooting.
+# DIAGNOSTICS
+# Remove these endpoints after troubleshooting.
 # =========================================================
 
 @app.route("/api/debug-paths", methods=["GET"])
 def debug_paths():
     candidates = [
-        BASE_DIR / "public" / "data",
-        BASE_DIR.parent / "public" / "data",
         BASE_DIR / "data",
+        BASE_DIR / "public" / "data",
+        BASE_DIR.parent / "data",
+        BASE_DIR.parent / "public" / "data",
     ]
 
     result = {
@@ -266,9 +272,16 @@ def debug_data():
                 "valid_json": True,
                 "valid_structure": (
                     isinstance(data, list)
-                    and all(isinstance(item, dict) for item in data)
+                    and all(
+                        isinstance(item, dict)
+                        for item in data
+                    )
                 ),
-                "count": len(data) if isinstance(data, list) else None,
+                "count": (
+                    len(data)
+                    if isinstance(data, list)
+                    else None
+                ),
             }
 
         except Exception as exc:
@@ -292,7 +305,10 @@ def uploaded_file(filename):
     )
 
 
-@app.route("/download-price/<path:filename>", methods=["GET"])
+@app.route(
+    "/download-price/<path:filename>",
+    methods=["GET"],
+)
 def download_price(filename):
     safe_filename = secure_filename(filename)
 

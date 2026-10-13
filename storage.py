@@ -3,6 +3,8 @@ import json
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
+
+# JSON files are inside public/data/
 DATA_DIR = BASE_DIR / "public" / "data"
 
 JSON_FILES = {
@@ -23,24 +25,20 @@ def _read_all(collection):
 
     if not path.is_file():
         raise FileNotFoundError(
-            f"{collection}.json not found in public/data"
+            f"{path.name} not found at {path}"
         )
 
-    try:
-        with path.open("r", encoding="utf-8-sig") as file:
-            data = json.load(file)
-    except json.JSONDecodeError as exc:
-        raise ValueError(
-            f"{collection}.json contains invalid JSON "
-            f"at line {exc.lineno}, column {exc.colno}"
-        ) from exc
+    with path.open("r", encoding="utf-8-sig") as file:
+        data = json.load(file)
 
     if not isinstance(data, list):
-        raise ValueError(f"{collection}.json must contain a JSON array")
+        raise ValueError(
+            f"{path.name} must contain a JSON array"
+        )
 
     if not all(isinstance(item, dict) for item in data):
         raise ValueError(
-            f"{collection}.json must contain JSON objects in its array"
+            f"{path.name} must contain JSON objects"
         )
 
     return data
