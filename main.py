@@ -68,7 +68,6 @@ EXCEL_EXTENSIONS = {".xlsx", ".xls", ".xlsm"}
 # --------------------------------------------------
 
 
-
 def get_price_files():
     if not PRICE_FOLDER.is_dir():
         return []
@@ -82,17 +81,12 @@ def get_price_files():
         if file.suffix.lower() not in EXCEL_EXTENSIONS:
             continue
 
-        # Original filename for downloading
         raw_name = file.name
-
-        # Remove extension
         name = file.stem
 
-        # Extract month and day from the filename
-        # Example:
-        # 001_Market_Price_၂၀၂၆*ခုနှစ်_ဇူလိုင်လ_၀၈*
+        # ဖိုင်နာမည်ထဲက မြန်မာလနဲ့ ရက်ကိုသာ ရှာမယ်
         match = re.search(
-            r"_(.+လ)_(\d{2})\*?$",
+            r"_(ဇန်နဝါရီလ|ဖေဖော်ဝါရီလ|မတ်လ|ဧပြီလ|မေလ|ဇွန်လ|ဇူလိုင်လ|ဩဂုတ်လ|စက်တင်ဘာလ|အောက်တိုဘာလ|နိုဝင်ဘာလ|ဒီဇင်ဘာလ)_(\d{2}|[၀-၉]{2})",
             name
         )
 
@@ -101,20 +95,15 @@ def get_price_files():
             day = match.group(2)
             display_name = f"{month} {day} ရက်"
         else:
-            # Fallback if the filename format differs
-            display_name = name
+            # လနဲ့ရက် မတွေ့ရင် ဖိုင်နာမည်အပြည့် မပြပါနဲ့
+            display_name = "ဈေးနှုန်းဖိုင်"
 
         files.append({
             "raw_name": raw_name,
             "display_name": display_name,
         })
 
-    return sorted(
-        files,
-        key=lambda item: item["raw_name"],
-        reverse=True,
-    )
-
+    return sorted(files, key=lambda item: item["raw_name"], reverse=True)
 
 
 # --------------------------------------------------
