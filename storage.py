@@ -3,8 +3,6 @@ import json
 from pathlib import Path
 
 BASE_DIR = Path(__file__).resolve().parent
-
-# JSON files are inside public/data/
 DATA_DIR = BASE_DIR / "public" / "data"
 
 JSON_FILES = {
@@ -44,13 +42,6 @@ def _read_all(collection):
     return data
 
 
-def _safe_int(value):
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return 0
-
-
 def list_records(collection, include_deleted=False):
     records = _read_all(collection)
 
@@ -60,11 +51,13 @@ def list_records(collection, include_deleted=False):
             if not record.get("delete_at")
         ]
 
-    return sorted(
-        records,
-        key=lambda record: _safe_int(record.get("id")),
-        reverse=True,
-    )
+    def record_id(record):
+        try:
+            return int(record.get("id", 0))
+        except (TypeError, ValueError):
+            return 0
+
+    return sorted(records, key=record_id, reverse=True)
 
 
 def get_record(collection, record_id):
@@ -72,3 +65,15 @@ def get_record(collection, record_id):
         if str(record.get("id")) == str(record_id):
             return record
     return None
+
+
+def data_status():
+    result = {}
+
+    for collection, path in JSON_FILES.items():
+        result[collection] = {
+            "path": str(path),
+            "exists": path.is_file(),
+        }
+
+    return result
