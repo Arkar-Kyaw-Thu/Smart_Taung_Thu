@@ -5,12 +5,12 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from langchain_community.retrievers import BM25Retriever
+from pathlib import Path
 
 load_dotenv()
 
-RETRIEVER_PATH = os.path.join(
-    os.path.dirname(os.path.dirname(__file__)), "bm25_retriever.pkl"
-)
+BASE_DIR = Path(__file__).resolve().parent.parent
+RETRIEVER_PATH = BASE_DIR / "kb" / "bm25_retriever.pkl"
 
 class RAGService:
     _retriever = None

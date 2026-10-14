@@ -37,6 +37,9 @@ from storage import (
 
 from service.media_service import MediaService
 
+# NEW: Chat/RAG service
+from service.rag_service import RAGService
+
 
 # =========================================================
 # Flask Configuration
@@ -121,7 +124,6 @@ def get_price_files():
             month = match.group(1)
             day = match.group(2)
 
-            # အင်္ဂလိပ်ဂဏန်းကို မြန်မာဂဏန်းပြောင်းမည်
             day = day.translate(
                 str.maketrans("0123456789", "၀၁၂၃၄၅၆၇၈၉")
             )
@@ -170,7 +172,6 @@ def save_uploaded_file(upload, target_dir, allowed_extensions):
     target_dir = Path(target_dir)
     target_dir.mkdir(parents=True, exist_ok=True)
 
-    # ရှိပြီးသားဖိုင်ကို မတော်တဆ overwrite မဖြစ်စေရန်
     destination = target_dir / filename
 
     if destination.exists():
@@ -302,7 +303,6 @@ def add_book():
         return redirect(url_for("index"))
 
     except ValueError as exc:
-        # Invalid extension or filename
         return str(exc), 400
 
     except (OSError, TypeError):
@@ -388,6 +388,54 @@ def add_media():
     except (OSError, TypeError):
         logger.exception("Could not add media")
         return "Media အချက်အလက် သိမ်းဆည်းရာတွင် အမှားဖြစ်နေပါသည်။", 500
+
+
+# =========================================================
+# Chat / RAG API
+# POST /api/chat
+# NEW: This route is added without changing existing routes.
+# =========================================================
+
+@app.route("/api/chat", methods=["POST"])
+def api_chat():
+    data = get_request_data()
+
+    if data is None:
+        return error_response(
+            "Request body must be a valid JSON object.",
+            400,
+        )
+
+    user_query = (
+        data.get("user_query")
+        or data.get("userQuery")
+        or data.get("message")
+        or ""
+    )
+
+    if not isinstance(user_query, str) or not user_query.strip():
+        return error_response(
+            "Please provide a non-empty user_query.",
+            400,
+        )
+
+    try:
+        answer = RAGService.answer_query(user_query.strip())
+
+        if answer is None:
+            answer = ""
+
+        return jsonify({
+            "success": True,
+            "answer": str(answer),
+        })
+
+    except Exception:
+        logger.exception("Chat/RAG request failed")
+        return error_response(
+            "Could not generate an answer.",
+            500,
+        )
 
 
 # =========================================================
@@ -629,13 +677,11 @@ def api_restore_record(collection, record_id):
 # GET /download-price/<filename>
 # =========================================================
 
-
 @app.route(
     "/download-price/<path:filename>",
     methods=["GET"],
 )
 def download_price(filename):
-    # URL-encoded filename ကို Unicode အဖြစ် ပြောင်းမည်
     decoded_name = unquote(filename)
 
     safe_name = Path(decoded_name).name
@@ -702,18 +748,15 @@ def refresh_price():
 @app.route("/files/<path:filename>", methods=["GET"])
 def uploaded_file(filename):
     try:
-        # URL-encoded filename ကို Unicode အဖြစ် ပြောင်းမည်
         decoded_name = unquote(filename)
 
         root = UPLOAD_DIR.resolve()
         file_path = (root / decoded_name).resolve()
 
-        # uploads folder အပြင်သို့ မထွက်စေရန်
         if not file_path.is_relative_to(root):
             logger.warning("Invalid file path: %s", decoded_name)
             abort(404)
 
-        # ဖိုင်မတွေ့လျှင် log ထုတ်မည်
         if not file_path.is_file():
             logger.warning(
                 "Uploaded file not found: requested=%r, resolved=%s",
@@ -773,7 +816,6 @@ def debug_paths():
         },
         "price_files": get_price_files(),
 
-        # Book cover နှင့် PDF ဖိုင်များကို စစ်ရန်
         "book_cover_files": (
             sorted(
                 file.name
