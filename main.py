@@ -701,21 +701,38 @@ def refresh_price():
 
 @app.route("/files/<path:filename>", methods=["GET"])
 def uploaded_file(filename):
-    # Reject absolute paths and traversal outside UPLOAD_DIR.
-    root = UPLOAD_DIR.resolve()
-    file_path = (root / filename).resolve()
+    try:
+        # URL-encoded filename ကို Unicode အဖြစ် ပြောင်းမည်
+        decoded_name = unquote(filename)
 
-    if not file_path.is_relative_to(root):
+        root = UPLOAD_DIR.resolve()
+        file_path = (root / decoded_name).resolve()
+
+        # uploads folder အပြင်သို့ မထွက်စေရန်
+        if not file_path.is_relative_to(root):
+            logger.warning("Invalid file path: %s", decoded_name)
+            abort(404)
+
+        # ဖိုင်မတွေ့လျှင် log ထုတ်မည်
+        if not file_path.is_file():
+            logger.warning(
+                "Uploaded file not found: requested=%r, resolved=%s",
+                decoded_name,
+                file_path,
+            )
+            abort(404)
+
+        logger.info("Serving uploaded file: %s", file_path)
+
+        return send_from_directory(
+            str(file_path.parent),
+            file_path.name,
+            as_attachment=False,
+        )
+
+    except (OSError, ValueError):
+        logger.exception("Error serving uploaded file: %s", filename)
         abort(404)
-
-    if not file_path.is_file():
-        abort(404)
-
-    return send_from_directory(
-        str(file_path.parent),
-        file_path.name,
-        as_attachment=False,
-    )
 
 
 # =========================================================
