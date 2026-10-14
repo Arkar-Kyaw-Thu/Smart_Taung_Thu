@@ -1,6 +1,7 @@
 
 import logging
 import re
+import os
 from pathlib import Path
 from urllib.parse import unquote
 
@@ -754,6 +755,26 @@ def debug_paths():
             for name, path in JSON_FILES.items()
         },
         "price_files": get_price_files(),
+
+        # Book cover နှင့် PDF ဖိုင်များကို စစ်ရန်
+        "book_cover_files": (
+            sorted(
+                file.name
+                for file in BOOK_COVER_DIR.iterdir()
+                if file.is_file()
+            )
+            if BOOK_COVER_DIR.is_dir()
+            else []
+        ),
+        "book_file_files": (
+            sorted(
+                file.name
+                for file in BOOK_FILE_DIR.iterdir()
+                if file.is_file()
+            )
+            if BOOK_FILE_DIR.is_dir()
+            else []
+        ),
     })
 
 
