@@ -1,11 +1,10 @@
-
 {
   "builds": [
     {
       "src": "main.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": "data/**"
+        "includeFiles": "{/data/**,uploads/price/**, uploads/book_cover/** ,uploads/book_file/**}"
       }
     }
   ],
