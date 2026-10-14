@@ -11,31 +11,31 @@
   },
   {
     "id": 2,
-    "description": "adajhj",
-    "link": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
-    "type": "knowledge",
-    "created_at": "2026-08-16 21:37:57",
-    "updated_at": "2026-08-23 15:52:52",
-    "deleted_at": "2026-08-23 15:52:52"
+    "description": "Ed Sheeran - Shape of You (Official news Video)",
+    "link": "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+    "type": "news",
+    "created_at": "2026-08-21T11:10:00Z",
+    "updated_at": "2026-08-21T11:10:00Z",
+    "deleted_at": null
   },
   {
     "id": 3,
-    "description": "fkajkd",
-    "link": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
+    "description": "Coldplay - Hymn For The Weekend (Official Video)",
+    "link": "https://www.youtube.com/watch?v=YykjpeuMNEk",
     "type": "news",
-    "created_at": "2026-08-16 21:38:07",
-    "updated_at": "2026-08-23 15:52:30",
-    "deleted_at": "2026-08-23 15:52:30"
+    "created_at": "2026-08-21T11:10:00Z",
+    "updated_at": "2026-08-21T11:10:00Z",
+    "deleted_at": null
   },
   {
     "id": 4,
-    "description": "djlalksd",
-    "link": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
-    "type": "knowledge",
-    "created_at": "2026-08-16 21:38:16",
-    "updated_at": "2026-08-23 15:52:23",
-    "deleted_at": "2026-08-23 15:52:23"
-  },
+    "description": "Maroon 5 - Sugar (Official news Video)",
+    "link": "https://www.youtube.com/watch?v=09R8_2nJtjg",
+    "type": "news",
+    "created_at": "2026-08-21T11:10:00Z",
+    "updated_at": "2026-08-21T11:10:00Z",
+    "deleted_at": null
+  }, 
   {
     "id": 5,
     "description": "ဂျင်း စိုက်ပျိုးနည်း အကြောင်း",
@@ -272,9 +272,9 @@
   },
   {
     "id": 31,
-    "description": "LITTLE BIG - I'M OK (Official Music Video)",
+    "description": "LITTLE BIG - I'M OK (Official news Video)",
     "link": "https://www.youtube.com/watch?v=Q4W3i8r9d1k",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -283,16 +283,16 @@
     "id": 32,
     "description": "Sia - Unstoppable (Official Video)",
     "link": "https://www.youtube.com/watch?v=YaEG2aWJnZ8",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
   },
   {
     "id": 33,
-    "description": "Imagine Dragons - Believer (Official Music Video)",
+    "description": "Imagine Dragons - Believer (Official news Video)",
     "link": "https://www.youtube.com/watch?v=7wtfhZwyrcc",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
@@ -301,63 +301,36 @@
     "id": 34,
     "description": "The Weeknd - Blinding Lights (Official Video)",
     "link": "https://www.youtube.com/watch?v=4NRXx6U8ABQ",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
   },
   {
     "id": 35,
-    "description": "Dua Lipa - Levitating (Official Music Video)",
+    "description": "Dua Lipa - Levitating (Official news Video)",
     "link": "https://www.youtube.com/watch?v=TUVcZfQe-Kw",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
   },
   {
     "id": 36,
-    "description": "Alan Walker - Faded (Official Music Video)",
+    "description": "Alan Walker - Faded (Official news Video)",
     "link": "https://www.youtube.com/watch?v=60ItHLz5WEA",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
   },
   {
     "id": 37,
-    "description": "Adele - Hello (Official Music Video)",
+    "description": "Adele - Hello (Official news Video)",
     "link": "https://www.youtube.com/watch?v=YQHsXMglC9A",
-    "type": "music",
+    "type": "news",
     "created_at": "2026-08-21T11:10:00Z",
     "updated_at": "2026-08-21T11:10:00Z",
     "deleted_at": null
-  },
-  {
-    "id": 38,
-    "description": "Ed Sheeran - Shape of You (Official Music Video)",
-    "link": "https://www.youtube.com/watch?v=JGwWNGJdvx8",
-    "type": "music",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
-    "deleted_at": null
-  },
-  {
-    "id": 39,
-    "description": "Coldplay - Hymn For The Weekend (Official Video)",
-    "link": "https://www.youtube.com/watch?v=YykjpeuMNEk",
-    "type": "music",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
-    "deleted_at": null
-  },
-  {
-    "id": 40,
-    "description": "Maroon 5 - Sugar (Official Music Video)",
-    "link": "https://www.youtube.com/watch?v=09R8_2nJtjg",
-    "type": "music",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
-    "deleted_at": null
-  } 
+  }
 ]

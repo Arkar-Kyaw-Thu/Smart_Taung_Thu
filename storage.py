@@ -16,7 +16,7 @@ KB_DIR = BASE_DIR / "kb"
 UPLOAD_DIR = BASE_DIR / "uploads"
 PRICE_DIR = UPLOAD_DIR / "price"
 BOOK_COVER_DIR = UPLOAD_DIR / "book_cover"
-BOOK_PDF_DIR = UPLOAD_DIR / "book_pdf"
+BOOK_FILE_DIR = UPLOAD_DIR / "book_file"
 
 JSON_FILES = {
     "books": DATA_DIR / "books.json",
@@ -53,7 +53,7 @@ def init_storage():
         UPLOAD_DIR,
         PRICE_DIR,
         BOOK_COVER_DIR,
-        BOOK_PDF_DIR,
+        BOOK_FILE_DIR,
     )
 
     for folder in folders:

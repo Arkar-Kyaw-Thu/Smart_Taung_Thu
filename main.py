@@ -23,7 +23,7 @@ from storage import (
     UPLOAD_DIR,
     PRICE_DIR,
     BOOK_COVER_DIR,
-    BOOK_PDF_DIR,
+    BOOK_FILE_DIR,
     JSON_FILES,
     list_records,
     get_record,
@@ -278,7 +278,7 @@ def add_book():
 
         book_filename = save_uploaded_file(
             request.files.get("file"),
-            BOOK_PDF_DIR,
+            BOOK_FILE_DIR,
             BOOK_EXTENSIONS,
         )
 
@@ -289,7 +289,7 @@ def add_book():
                 image_name,
             ),
             "file": uploaded_relative_path(
-                "book_pdf",
+                "book_file",
                 book_filename,
             ),
         }
@@ -695,7 +695,7 @@ def refresh_price():
 # =========================================================
 # Uploaded Files
 # GET /files/book_cover/<filename>
-# GET /files/book_pdf/<filename>
+# GET /files/book_file/<filename>
 # =========================================================
 
 @app.route("/files/<path:filename>", methods=["GET"])
@@ -731,7 +731,7 @@ def debug_paths():
         "uploads": UPLOAD_DIR,
         "price": PRICE_DIR,
         "book_cover": BOOK_COVER_DIR,
-        "book_pdf": BOOK_PDF_DIR,
+        "book_file": BOOK_FILE_DIR,
         "templates": BASE_DIR / "templates",
         "static": BASE_DIR / "static",
     }
