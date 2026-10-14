@@ -1,8 +1,7 @@
-
 [
   {
     "id": 1,
-    "description": "စပါးဧကသောင်းချီ ရေနစ်မြုပ်လို့ စားဝတ်နေရေးအတွက် ပြည်သူတွေ စိုးရိမ် - DVB News",
+    "title": "စပါးဧကသောင်းချီ ရေနစ်မြုပ်လို့ စားဝတ်နေရေးအတွက် ပြည်သူတွေ စိုးရိမ် - DVB News",
     "link": "https://youtu.be/tEq4twBW8kM?si=xYj9A8_HKbzv6Y5a",
     "type": "news",
     "created_at": "2026-08-16 19:37:24",
@@ -11,34 +10,34 @@
   },
   {
     "id": 2,
-    "description": "Ed Sheeran - Shape of You (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=JGwWNGJdvx8",
+    "title": "စိုက်ပျိုးသုတ မေလ",
+    "link": "https://www.youtube.com/watch?v=UF4n0mVgAY4",
     "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:29:01",
     "deleted_at": null
   },
   {
     "id": 3,
-    "description": "Coldplay - Hymn For The Weekend (Official Video)",
-    "link": "https://www.youtube.com/watch?v=YykjpeuMNEk",
-    "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "title": "ငလျင်လှုပ်ပြီးနောက် စိုက်ပျိုးသူများ သိထားသင့်တဲ့ စိုက်ပျိုးနည်းစနစ်များ",
+    "link": "https://www.youtube.com/watch?v=_OqM2eJtxo4",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 4,
-    "description": "Maroon 5 - Sugar (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=09R8_2nJtjg",
-    "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "title": "မြေဆီလွှာအတွက် အကျိုးရှိတဲ့ ဟူးမစ်အက်ဆစ်အကြောင်း",
+    "link": "https://www.youtube.com/watch?v=0yKeSOoPIf4",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
-  }, 
+  },
   {
     "id": 5,
-    "description": "ဂျင်း စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ဂျင်း  စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=O0LghTSrsG0",
     "type": "knowledge",
     "created_at": "2026-08-23 15:36:50",
@@ -47,7 +46,7 @@
   },
   {
     "id": 6,
-    "description": "ခရမ်းသီး စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ခရမ်းသီး စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=dWNOKVwcvpI",
     "type": "knowledge",
     "created_at": "2026-08-23 15:50:03",
@@ -56,7 +55,7 @@
   },
   {
     "id": 7,
-    "description": "ကြက်သွန်ဖြူမြိတ် စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ကြက်သွန်ဖြူမြိတ် စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=p7_F2LzECyQ",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -65,7 +64,7 @@
   },
   {
     "id": 8,
-    "description": "ဗိုလ်စားပဲစိုက်နည်း အကြောင်း",
+    "title": "ဗိုလ်စားပဲစိုက်နည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=T21QvD1lbUw",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -74,7 +73,7 @@
   },
   {
     "id": 9,
-    "description": "ငှက်ပျောပင်စိုက်ပျိုးနည်းအကြောင်း",
+    "title": "ငှက်ပျောပင်စိုက်ပျိုးနည်းအကြောင်း",
     "link": "https://www.youtube.com/watch?v=oOl4i8jBWWA",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -83,7 +82,7 @@
   },
   {
     "id": 10,
-    "description": "စတော်ဘယ်ရီသီး စိုက်ပျိုးနည်း",
+    "title": "စတော်ဘယ်ရီသီး စိုက်ပျိုးနည်း",
     "link": "https://www.youtube.com/watch?v=2EsY53rTYjc",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -92,7 +91,7 @@
   },
   {
     "id": 11,
-    "description": "ရုံးပတေသီး စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ရုံးပတေသီး စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=s9RdHBa1cgo",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -101,7 +100,7 @@
   },
   {
     "id": 12,
-    "description": "ကန်စွန်းဥ စိုက်ပျိုးနည်းအကြောင်း",
+    "title": "ကန်စွန်းဥ စိုက်ပျိုးနည်းအကြောင်း",
     "link": "https://www.youtube.com/watch?v=dbBcMa7IChY",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -110,7 +109,7 @@
   },
   {
     "id": 13,
-    "description": "ခရမ်းကျွတ်သီး စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ခရမ်းကျွတ်သီး စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=JRziBsOo5ps",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -119,7 +118,7 @@
   },
   {
     "id": 14,
-    "description": "ကြက်သွန်မြိတ် စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ကြက်သွန်မြိတ် စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=E1-TyhqB33w",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -128,7 +127,7 @@
   },
   {
     "id": 15,
-    "description": "ဂေါ်ဖီထုပ် စိုက်ပျိုးနည်းအကြောင်း",
+    "title": "ဂေါ်် ဖီထုပ် စိုက်ပျိုးနည်းအကြောင်း",
     "link": "https://www.youtube.com/watch?v=qAm_NZ9Bh6E",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -137,7 +136,7 @@
   },
   {
     "id": 16,
-    "description": "ကန်စွန်းရွက် စိုက်ပျိုးနည်း အကြောင်း",
+    "title": "ကန်စွန်းရွက် စိုက်ပျိုးနည်း အကြောင်း",
     "link": "https://www.youtube.com/watch?v=R1MJFux3RD8",
     "type": "knowledge",
     "created_at": "2026-08-23 15:52:12",
@@ -146,7 +145,7 @@
   },
   {
     "id": 17,
-    "description": "ရန်ကင်းက မခင်ကင်းစင်ရဲ့ ကားတာယာထဲ ဆလပ်ရွက်စိုက်နည်းတဲ့။ ယူတတ်ရင်ပညာကြီးပဲ",
+    "title": "ရန်ကင်းက မခင်ကင်းစင်ရဲ့ ကားတာယာထဲ ဆလပ်ရွက်စိုက်နည်းတဲ့။ ယူတတ်ရင်ပညာကြီးပဲ",
     "link": "https://www.youtube.com/watch?v=FquKGPFymX4",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -155,7 +154,7 @@
   },
   {
     "id": 18,
-    "description": "မြေနေရာမရှိသူများအတွက် ကိုယ့်တိုက်ခန်းထဲမှာတင် သီးပင်စားပင်စိုက်နည်းပြခဲ့တဲ့ မစိမ်းမို...",
+    "title": "မြေနေရာမရှိသူများအတွက် ကိုယ့်တိုက်ခန်းထဲမှာတင် သီးပင်စားပင်စိုက်နည်းပြခဲ့တဲ့ မစိမ်းမို...",
     "link": "https://www.youtube.com/watch?v=HfdtEdls8-Y",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -164,7 +163,7 @@
   },
   {
     "id": 19,
-    "description": "သူ့စိုက်နည်းနဲ့ဆို ငှက်ပျောတစ်ပင်သီးနှုန်းက သာမန်ငှက်ပျောတစ်ခြံသီးနှုန်းနဲ့ညီစေရမယ်ဆို...",
+    "title": "သူ့စိုက်နည်းနဲ့ဆို ငှက်ပျောတစ်ပင်သီးနှုန်းက သာမန်ငှက်ပျောတစ်ခြံသီးနှုန်းနဲ့ညီစေရမယ်ဆို...",
     "link": "https://www.youtube.com/watch?v=nuJt1IpHNqA",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -173,7 +172,7 @@
   },
   {
     "id": 20,
-    "description": "တစ်လကို ဆယ်သိန်းရတဲ့ ငွေနှင်းမှိုစိုက်နည်းကို ပြခဲ့တဲ့အစ်ကို",
+    "title": "တစ်လကို ဆယ်သိန်းရတဲ့ ငွေနှင်းမှိုစိုက်နည်းကို ပြခဲ့တဲ့အစ်ကို",
     "link": "https://www.youtube.com/watch?v=ZW78T1cnjOc",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -182,7 +181,7 @@
   },
   {
     "id": 21,
-    "description": "ပေါင်းအိုးကိုလွှတ်မပစ်ဘဲ ပလတ်စတစ်ကနေဓါတ်ဆီထုတ်နည်းပြခဲ့တဲ့ မြင်းခြံက ကျော်သီဟ",
+    "title": "ပေါင်းအိုးကိုလွှတ်မပစ်ဘဲ ပလတ်စတစ်ကနေဓါတ်ဆီထုတ်နည်းပြခဲ့တဲ့ မြင်းခြံက ကျော်သီဟ",
     "link": "https://www.youtube.com/watch?v=qt9QIdLQ4Zk",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -191,7 +190,7 @@
   },
   {
     "id": 22,
-    "description": "သဘာဝတရားရဲ့ နိယာမကိုအသုံးချပြီး မကုန်ခန်းနိုင်တဲ့လျှပ်စစ်ထုတ်နည်းပြခဲ့တဲ့ မြင်းခြံက သိန...",
+    "title": "သဘာဝတရားရဲ့ နိယာမကိုအသုံးချပြီး မကုန်ခန်းနိုင်တဲ့လျှပ်စစ်ထုတ်နည်းပြခဲ့တဲ့ မြင်းခြံက သိန...",
     "link": "https://www.youtube.com/watch?v=0b7zOSUCvmc",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -200,7 +199,7 @@
   },
   {
     "id": 23,
-    "description": "သံပုရာသီးကို အာလူးသုံးပြီး ဆယ်ဆပိုသီးအောင်စိုက်နည်းပြခဲ့တဲ့ ဧရာဝတီတိုင်းက ဦးစိုးမြင့်",
+    "title": "သံပုရာသီးကို အာလူးသုံးပြီး ဆယ်ဆပိုသီးအောင်စိုက်နည်းပြခဲ့တဲ့ ဧရာဝတီတိုင်းက ဦးစိုးမြင့်",
     "link": "https://www.youtube.com/watch?v=VSPphkfMsFc",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -209,7 +208,7 @@
   },
   {
     "id": 24,
-    "description": "နိုင်ငံခြားက ဈေးကြီးပေးရတဲ့သစ်သီးဖျော်စက်ကို အိမ်မှာတင်လုပ်နည်းပြခဲ့တဲ့ ကိုညီညီ",
+    "title": "နိုင်ငံခြားက ဈေးကြီးပေးရတဲ့သစ်သီးဖျော်စက်ကို အိမ်မှာတင်လုပ်နည်းပြခဲ့တဲ့ ကိုညီညီ",
     "link": "https://www.youtube.com/watch?v=5WN2aekRRYg",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -218,7 +217,7 @@
   },
   {
     "id": 25,
-    "description": "အိမ်ရှေ့ဝရံတာမှာတင် တစ်လတစ်သိန်းပုံမှန်ရတဲ့ ကန်စွန်းခင်းစိုက်နည်းပြခဲ့တဲ့ ရန်ကင်းက ကိုန...",
+    "title": "အိမ်ရှေ့ဝရံတာမှာတင် တစ်လတစ်သိန်းပုံမှန်ရတဲ့ ကန်စွန်းခင်းစိုက်နည်းပြခဲ့တဲ့ ရန်ကင်းက ကိုန...",
     "link": "https://www.youtube.com/watch?v=qQGYP2-nDzw",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -227,7 +226,7 @@
   },
   {
     "id": 26,
-    "description": "ပလတ်စတစ်ခြင်းသုံးပြီး ကိုယ့်အိမ်ထဲမှာတင် သခွါးသီးရှယ်သီးအောင်စိုက်နည်းပြခဲ့တဲ့ ကိုညီညီ",
+    "title": "ပလတ်စတစ်ခြင်းသုံးပြီး ကိုယ့်အိမ်ထဲမှာတင် သခွါးသီးရှယ်သီးအောင်စိုက်နည်းပြခဲ့တဲ့ ကိုညီညီ",
     "link": "https://www.youtube.com/watch?v=7rMc7gFphFs",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -236,7 +235,7 @@
   },
   {
     "id": 27,
-    "description": "ကိုယ့်အိမ်ခန်းထဲမှာတင် ကောက်ရိုးမှိုစိုက်နည်းပြခဲ့တဲ့ မြေနီကုန်းက ကိုထက်နိုင်",
+    "title": "ကိုယ့်အိမ်ခန်းထဲမှာတင် ကောက်ရိုးမှိုစိုက်နည်းပြခဲ့တဲ့ မြေနီကုန်းက ကိုထက်နိုင်",
     "link": "https://www.youtube.com/watch?v=t6CXr15fWUA",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -245,7 +244,7 @@
   },
   {
     "id": 28,
-    "description": "မြေနေရာအကျယ်မလို ကိုယ့်အိမ်ထဲမှာတင် ပလတ်စတစ်အိတ်နဲ့ခရမ်းသီးစိုက်နည်းပြခဲ့တဲ့ မကွေးက ကို...",
+    "title": "မြေနေရာအကျယ်မလို ကိုယ့်အိမ်ထဲမှာတင် ပလတ်စတစ်အိတ်နဲ့ခရမ်းသီးစိုက်နည်းပြခဲ့တဲ့ မကွေးက ကို...",
     "link": "https://www.youtube.com/watch?v=WdK7vLouTDY",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -254,7 +253,7 @@
   },
   {
     "id": 29,
-    "description": "သဘာဝနည်းလမ်းတွေသုံးပြီး ပဲသီးကိုရှယ်သီးအောင်စိုက်နည်းပြခဲ့တဲ့ မြောင်းမြက ကိုရန်နိုင်လင...",
+    "title": "သဘာဝနည်းလမ်းတွေသုံးပြီး ပဲသီးကိုရှယ်သီးအောင်စိုက်နည်းပြခဲ့တဲ့ မြောင်းမြက ကိုရန်နိုင်လင...",
     "link": "https://www.youtube.com/watch?v=P3yX2sWYPl4",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -263,7 +262,7 @@
   },
   {
     "id": 30,
-    "description": "ကိုယ့်အိမ်ခြံဝင်းထဲမှာတင် သခွါးဖရုံစိုက်နည်းပြခဲ့တဲ့ မြောင်းမြမြို့က ကိုသီလ",
+    "title": "ကိုယ့်အိမ်ခြံဝင်းထဲမှာတင် သခွါးဖရုံစိုက်နည်းပြခဲ့တဲ့ မြောင်းမြမြို့က ကိုသီလ",
     "link": "https://www.youtube.com/watch?v=Re0i3297Ro8",
     "type": "knowledge",
     "created_at": "2026-08-23 19:52:46",
@@ -272,65 +271,182 @@
   },
   {
     "id": 31,
-    "description": "LITTLE BIG - I'M OK (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=Q4W3i8r9d1k",
+    "title": "စိုက်ချိန်ရိတ်ချိန်ဖြေပေးရင်း .. ဖုန်းဘေလ်ကံစမ်းကြမယ်",
+    "link": "https://www.youtube.com/watch?v=fOxyKx10r00",
     "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 32,
-    "description": "Sia - Unstoppable (Official Video)",
-    "link": "https://www.youtube.com/watch?v=YaEG2aWJnZ8",
+    "title": "မလိုအပ်ဘဲ ဆုံးရှုံးမှုတွေ မဖြစ်ရအောင် စောင့်ကြည့်သင့်တဲ့ စိုက်ပျိုးမိုးလေဝသ (ENG subtitle include)",
+    "link": "https://www.youtube.com/watch?v=eO8o368Tpas",
     "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 33,
-    "description": "Imagine Dragons - Believer (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=7wtfhZwyrcc",
-    "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "title": "Green Wayဆော့ဝဲထဲမှာရှိနေတဲ့ အဖွဲ့တွေနဲ့ စိုက်ပျိုးပြဿနာတွေ ဝင်ရောက်ဆွေးနွေးလို့ရနေတာ သိပြီးပ...",
+    "link": "https://www.youtube.com/watch?v=-mug4f6z6NY",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 34,
-    "description": "The Weeknd - Blinding Lights (Official Video)",
-    "link": "https://www.youtube.com/watch?v=4NRXx6U8ABQ",
-    "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "title": "စိုက်ပျိုးရေးဆောင်းပါးတွေကို စိတ်ကြိုက်အဝဖတ်ချင်ပါသလား?",
+    "link": "https://www.youtube.com/watch?v=iPZWgs_Xi_Y",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 35,
-    "description": "Dua Lipa - Levitating (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=TUVcZfQe-Kw",
+    "title": "🌶️ ငရုတ်သီးကြိုက်သူတိုင်း ဝင်ရောက်နားထောင်သင့်တဲ့ အခမဲ့အွန်လိုင်းဆွေးနွေးပွဲ",
+    "link": "https://www.youtube.com/watch?v=mKcVeI1-eq8",
     "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 36,
-    "description": "Alan Walker - Faded (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=60ItHLz5WEA",
-    "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "title": "Translaminar ဆိုတာ ပိုးသတ်ဆေးထဲက ဘယ်လိုaction မျိုးလဲဆရာ",
+    "link": "https://www.youtube.com/watch?v=FKTn7pmIHvE",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   },
   {
     "id": 37,
-    "description": "Adele - Hello (Official news Video)",
-    "link": "https://www.youtube.com/watch?v=YQHsXMglC9A",
-    "type": "news",
-    "created_at": "2026-08-21T11:10:00Z",
-    "updated_at": "2026-08-21T11:10:00Z",
+    "title": "ပြည်ပပို့ကုန်စံချိန်မီ ပဲတီစိမ်း၊ မတ်ပဲ စိုက်ပျိုးနည်းသင်တန်း",
+    "link": "https://www.youtube.com/watch?v=M1M6iNI6lh8",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 38,
+    "title": "ပြည်ပပို့ကုန် စံချိန်မီ ပဲတီစိမ်း၊ မတ်ပဲ စိုက်ပျိုးနည်းသင်တန်း",
+    "link": "https://www.youtube.com/watch?v=h5c9d4s1pfM",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 39,
+    "title": "စိုက်ပျိုးရေးတွင် ရှာလကာရည်အသုံးပြုနည်း (၆) နည်း",
+    "link": "https://www.youtube.com/watch?v=av7-u4NT2dQ",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 40,
+    "title": "ဖုံးအုပ်စိုက်ပေမဲ့ ရေမပေးတတ်ဘူး ... ငနီ",
+    "link": "https://www.youtube.com/watch?v=oPxUs1TBW3Y",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 41,
+    "title": "ဘောင်တင်စိုက်မယ့် ဦးဘကျော်ကို မောင်နီက မြေဖုံးစိုက်ဖို့အကြံပေး",
+    "link": "https://www.youtube.com/watch?v=nYR3J0dutWE",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 42,
+    "title": "ဘောင်တင်စိုက်ပျိုးရေး မောင်နီအကြံပေး",
+    "link": "https://www.youtube.com/watch?v=h7ntXgkFESc",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 43,
+    "title": "ပန်းအိုးနဲ့ စိုက်ပျိုးနိုင်သော ဟင်းခတ်အမွှေးအကြိုင်များ",
+    "link": "https://www.youtube.com/watch?v=Rj42uypklWM",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 44,
+    "title": "ဘက်စုံနည်းဖြင့်ကာကွယ်မယ် စပါးဖြုတ်ပိုးအန္တရာယ်",
+    "link": "https://www.youtube.com/watch?v=1qraZygPXMY",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 45,
+    "title": "ကိုမောင်နီ.. ကိုမောင်နီ ဟေ..  ဘူးသီးစိုက်နည်းပြောပြဦးဗျ",
+    "link": "https://www.youtube.com/watch?v=8KsIdlrKoSU",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 46,
+    "title": "စပါးခင်းက ဖြုတ်တွေကို ဘာကြောင့်မနိုင်ကြတာလဲ?",
+    "link": "https://www.youtube.com/watch?v=YyhlwOTjJcA",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 47,
+    "title": "စိုက်ပျိုးမှတ်တမ်း စာအုပ်ကို အခမဲ့ယူပြီး မှတ်ကြမယ်",
+    "link": "https://www.youtube.com/watch?v=_64BC0DrslY",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 48,
+    "title": "ဒေသနဲ့ ကိုက်ညီတဲ့မျိုးစပါးရွေးချယ်နည်းနဲ့ ကုန်ကျစရိတ်လျော့နည်းစွာ စနစ်မှန်မှန် စိုက်ပျိ...",
+    "link": "https://www.youtube.com/watch?v=GwXwBRyeUWw",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 49,
+    "title": "အစိမ်းရောင်လမ်းနဲ့အတူ မိုးစပါးစိုက်ပျိုးနိုင်ပြီ",
+    "link": "https://www.youtube.com/watch?v=4U7OXxjDtfA",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
+    "deleted_at": null
+  },
+  {
+    "id": 50,
+    "title": "အညာတောင်သူတွေကိုယ်တိုင် သဲသဲမဲမဲသုံးနေတဲ့ သဘာဝပိုးသတ်ဆေးများ",
+    "link": "https://www.youtube.com/watch?v=ZUBYheSjw88",
+    "type": "knowledge",
+    "created_at": "2026-08-23 20:24:08",
+    "updated_at": "2026-08-23 20:24:08",
     "deleted_at": null
   }
 ]
