@@ -2,6 +2,7 @@
 import logging
 import re
 from pathlib import Path
+from urllib.parse import unquote
 
 from flask import (
     Flask,
@@ -627,21 +628,30 @@ def api_restore_record(collection, record_id):
 # GET /download-price/<filename>
 # =========================================================
 
+
 @app.route(
     "/download-price/<path:filename>",
     methods=["GET"],
 )
 def download_price(filename):
-    safe_name = Path(filename).name
+    # URL-encoded filename ကို Unicode အဖြစ် ပြောင်းမည်
+    decoded_name = unquote(filename)
 
-    if safe_name != filename:
+    safe_name = Path(decoded_name).name
+
+    if safe_name != decoded_name:
         abort(404)
 
     if Path(safe_name).suffix.lower() not in EXCEL_EXTENSIONS:
         abort(404)
 
-    if not (PRICE_DIR / safe_name).is_file():
-        logger.warning("Price file not found: %s", safe_name)
+    file_path = PRICE_DIR / safe_name
+
+    if not file_path.is_file():
+        logger.warning(
+            "Price file not found: %s",
+            safe_name,
+        )
         abort(404)
 
     return send_from_directory(
