@@ -4,7 +4,7 @@
       "src": "main.py",
       "use": "@vercel/python",
       "config": {
-        "includeFiles": "{/data/**,uploads/price/**, uploads/book_cover/** ,uploads/book_file/**}"
+        "includeFiles": "{data/**,uploads/price/**,uploads/book_cover/**,uploads/book_file/**}"
       }
     }
   ],
