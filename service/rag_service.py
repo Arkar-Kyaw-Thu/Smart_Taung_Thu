@@ -3,37 +3,54 @@ import pickle
 import itertools
 import time
 import random
+import logging
 
 from pathlib import Path
+from threading import Lock
+
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from langchain_community.retrievers import BM25Retriever
+
+
+# ---------------------------------------------------------
+# CONFIGURATION
+# ---------------------------------------------------------
 
 load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 RETRIEVER_PATH = BASE_DIR / "kb" / "bm25_retriever.pkl"
 
+logger = logging.getLogger(__name__)
+
+
+class AIServiceUnavailable(Exception):
+    """Raised when all configured Gemini models fail."""
+
 
 class RAGService:
     _retriever = None
     _all_docs_cache = None
-    _key_iter = None
     _api_keys = []
+    _key_iter = None
+    _key_lock = Lock()
 
-    # Gemini model
-    MODEL_NAME = "gemini-3.6-flash"
+    # Primary model first, followed by fallback models.
+    # Confirm availability for your Google AI Studio API key.
+    MODEL_NAMES = [
+        os.getenv("GEMINI_MODEL", "gemini-3.8-flash"),
+        "gemini-3.7-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash-lite",
+    ]
 
-    # Reduced retry settings to limit long-running requests
-    MAX_RETRIES = 2
-    INITIAL_RETRY_DELAY = 1
-    MAX_RETRY_DELAY = 2
-
-    # Retrieval and context limits
-    RETRIEVER_TOP_K = 8
+    MAX_RETRIES_PER_MODEL = 2
+    INITIAL_RETRY_DELAY = 1.0
+    MAX_RETRY_DELAY = 8.0
     MAX_CONTEXT_CHARS = 24000
-    MAX_DOCUMENTS_DIRECT_MATCH = 8
+    MAX_OUTPUT_TOKENS = 4096
 
     CROPS = [
         "စပါး", "ကစော့ခါး", "ကညွတ်", "ကနခို", "ကနဖေါ့", "ကျွဲကော",
@@ -52,42 +69,43 @@ class RAGService:
             "စိုက်ပျိုးချိန်များ", "စိုက်ချိန်များ"
         ],
         "စိုက်ပျိုးနည်း": [
-            "စိုက်ပျိုးနည်း", "စိုက်နည်း",
+            "စိုက်", "စိုက်ပျိုး", "စိုက်ပျိုးနည်း", "စိုက်နည်း",
             "စိုက်ပျိုးနည်းစနစ်", "ဘယ်လို့စိုက်ရမလဲ",
-            "စိုက်ပျိုးနည်းများ", "စိုက်နည်းများ", "စိုက်ပျိုး"
+            "စိုက်ပျိုးနည်းများ", "စိုက်နည်းများ"
         ],
         "ပိုးမွှား": [
-            "ပိုးမွှား", "ဖျက်ပိုး",
+            "ပိုး", "ပိုးမွှား", "ဖျက်ပိုး",
             "ပိုးမွှားများ", "ပိုးမွှားအမျိုးအစား"
         ],
         "ရောဂါ": [
             "ရောဂါ", "ရောဂါများ", "ဖျက်ရောဂါ",
             "ရောဂါအမျိုးအစား", "ရောဂါအမျိုးအစားများ"
         ],
-        "ဒေသ": ["ဒေသအလိုက်", "ဒေသ"],
+        "ဒေသ": ["ဒေသ", "ဒေသအလိုက်"],
         "မြေအမျိုးအစား": [
-            "မြေအမျိုးအစား", "မြေမျိုး", "ဘယ်မြေ",
-            "မြေအမျိုးအစားများ"
+            "မြေအမျိုး", "မြေအမျိုးအစား", "မြေမျိုး",
+            "ဘယ်မြေ", "မြေအမျိုးအစားများ"
         ],
         "အကြောင်း": [
-            "အကြောင်းအရာ", "အကြောင်းအရာများ", "ဘာလဲ"
+            "အကြောင်း", "အကြောင်းအရာ",
+            "အကြောင်းအရာများ", "ဘာလဲ"
         ],
         "အသုံးပြုသည့်အစိတ်အပိုင်း": [
-            "ဘယ်အစိတ်အပိုင်း", "အစိတ်အပိုင်းများ",
-            "အစိတ်အပိုင်း"
+            "အစိတ်အပိုင်း", "အစိတ်အပိုင်းများ",
+            "ဘယ်အစိတ်အပိုင်း", "ဘယ်အစိတ်အပိုင်းများ"
         ],
         "ဆေးဖက်ဝင်အာနိသင်": [
-            "ဆေးဖက်ဝင်အာနိသင်",
-            "ဆေးဖက်ဝင်အာနိသင်များ",
-            "ဘယ်ဆေးဖက်ဝင်အာနိသင်"
+            "ဆေးဖက်ဝင်အာနိသင်", "ဆေးဖက်ဝင်အာနိသင်များ",
+            "ဘယ်ဆေးဖက်ဝင်အာနိသင်",
+            "ဘယ်ဆေးဖက်ဝင်အာနိသင်များ"
         ],
         "အသုံးပြုပုံ": [
             "အသုံးပြုပုံ", "အသုံးပြုပုံများ",
-            "ဘယ်လိုအသုံးပြုရမလဲ", "ဘယ်လိုအသုံးပြုပုံ"
+            "ဘယ်လိုအသုံးပြုရမလဲ",
+            "ဘယ်လိုအသုံးပြုပုံ", "ဘယ်လိုအသုံးပြုပုံများ"
         ],
         "ဓာတ်မြေဩဇာသုံးစွဲခြင်း": [
-            "ဓာတ်မြေဩဇာ",
-            "ဓာတ်မြေဩဇာသုံးစွဲခြင်း",
+            "ဓာတ်မြေဩဇာ", "ဓာတ်မြေဩဇာသုံးစွဲခြင်း",
             "ဘယ်လိုဓာတ်မြေဩဇာသုံးစွဲရမလဲ"
         ],
         "ရေသွင်းခြင်း": [
@@ -95,8 +113,8 @@ class RAGService:
             "ဘယ်လိုရေသွင်းရမလဲ"
         ],
         "ရာသီဥတု": [
-            "ရာသီဥတုအခြေအနေ", "ဘယ်လိုရာသီဥတု",
-            "ရာသီဥတု"
+            "ရာသီဥတု", "ရာသီဥတုအခြေအနေ",
+            "ဘယ်လိုရာသီဥတု"
         ],
         "ရိတ်သိမ်းခြင်း": [
             "ရိတ်သိမ်းခြင်း", "ရိတ်သိမ်းနည်း",
@@ -104,103 +122,111 @@ class RAGService:
         ],
     }
 
+    # -----------------------------------------------------
+    # API KEYS
+    # -----------------------------------------------------
+
     @classmethod
     def _initialize_keys(cls):
-        """Load API keys from .env once."""
+        """Load all configured API keys once."""
 
         if cls._key_iter is not None:
             return
 
         keys = []
 
-        # Read API_KEY_1, API_KEY_2, API_KEY_3, ...
-        i = 1
-        while True:
-            key = os.getenv(f"API_KEY_{i}")
-
-            if not key:
-                break
-
-            key = key.strip()
+        # Do not stop at a missing key number.
+        for i in range(1, 51):
+            key = os.getenv(f"API_KEY_{i}", "").strip()
 
             if key and key not in keys:
                 keys.append(key)
 
-            i += 1
+        single_key = os.getenv("API_KEY", "").strip()
 
-        # Also support a single API_KEY
-        single_key = os.getenv("API_KEY")
-
-        if single_key:
-            single_key = single_key.strip()
-
-            if single_key and single_key not in keys:
-                keys.append(single_key)
+        if single_key and single_key not in keys:
+            keys.append(single_key)
 
         if not keys:
-            raise ValueError(
-                "API Key တစ်ခုမှ မတွေ့ပါ။ "
-                ".env ဖိုင်ထဲတွင် API_KEY သို့မဟုတ် "
-                "API_KEY_1 ကို ထည့်ပေးပါ။"
+            raise RuntimeError(
+                "Gemini API key မတွေ့ပါ။ "
+                "Vercel Environment Variables ထဲတွင် "
+                "API_KEY_1 သို့မဟုတ် API_KEY ထည့်ပါ။"
             )
 
-        cls._api_keys = keys
-        cls._key_iter = itertools.cycle(keys)
+        with cls._key_lock:
+            if cls._key_iter is None:
+                cls._api_keys = keys
+                cls._key_iter = itertools.cycle(keys)
 
-        print(f"Gemini API keys loaded: {len(keys)}")
+        logger.info("Gemini API keys loaded: %s", len(keys))
 
     @classmethod
     def get_genai_client(cls):
-        """Create a client using the next API key."""
+        """Create a Gemini client using the next configured key."""
 
         cls._initialize_keys()
 
-        key = next(cls._key_iter)
+        with cls._key_lock:
+            key = next(cls._key_iter)
 
         return genai.Client(api_key=key)
 
+    # -----------------------------------------------------
+    # LOAD BM25 RETRIEVER
+    # -----------------------------------------------------
+
     @classmethod
     def get_retriever(cls):
-        """Load the BM25 retriever and document cache."""
+        """Load the existing pickle and cache its documents."""
 
         if cls._retriever is not None:
             return cls._retriever
 
         if not RETRIEVER_PATH.exists():
-            print(f"Retriever file not found: {RETRIEVER_PATH}")
+            logger.error("Retriever file not found: %s", RETRIEVER_PATH)
             return None
 
         try:
-            with open(RETRIEVER_PATH, "rb") as f:
-                all_docs = pickle.load(f)
+            with open(RETRIEVER_PATH, "rb") as file:
+                all_docs = pickle.load(file)
+
+            if not all_docs:
+                logger.error("Retriever file contains no documents.")
+                return None
 
             cls._all_docs_cache = all_docs
 
             cls._retriever = BM25Retriever.from_documents(all_docs)
-            cls._retriever.k = cls.RETRIEVER_TOP_K
+            cls._retriever.k = 60
 
-            print(f"BM25 retriever loaded: {len(all_docs)} documents")
+            logger.info(
+                "BM25 retriever loaded: %s documents",
+                len(all_docs),
+            )
 
             return cls._retriever
 
-        except Exception as e:
-            print(f"Retriever loading error: {e}")
+        except Exception:
+            logger.exception("Retriever loading failed")
             return None
+
+    # -----------------------------------------------------
+    # QUERY PROCESSING
+    # -----------------------------------------------------
 
     @classmethod
     def smart_query_processing(cls, user_query: str):
-        """Detect crop and intent from the user's question."""
+        """Detect crop and intent from a Myanmar-language question."""
 
         detected_crop = None
         detected_intent = ""
 
-        # Detect crop
         for crop in cls.CROPS:
             if crop in user_query:
                 detected_crop = crop
                 break
 
-        # Detect intent
         for intent_name, keywords in cls.INTENTS.items():
             if any(keyword in user_query for keyword in keywords):
                 detected_intent = intent_name
@@ -208,25 +234,30 @@ class RAGService:
 
         return user_query, detected_crop, detected_intent
 
+    # -----------------------------------------------------
+    # ERROR CLASSIFICATION
+    # -----------------------------------------------------
+
     @classmethod
     def _is_retryable_error(cls, error):
-        """Identify temporary API and network errors."""
+        """Retry temporary service errors, not invalid requests."""
 
         message = str(error).upper()
 
-        non_retryable_markers = [
+        permanent_errors = [
             "API_KEY_INVALID",
             "API KEY NOT VALID",
             "PERMISSION_DENIED",
             "UNAUTHENTICATED",
             "INVALID_ARGUMENT",
             "404 NOT_FOUND",
+            "NOT_FOUND",
         ]
 
-        if any(marker in message for marker in non_retryable_markers):
+        if any(marker in message for marker in permanent_errors):
             return False
 
-        retryable_markers = [
+        retryable_errors = [
             "429",
             "500",
             "502",
@@ -243,99 +274,144 @@ class RAGService:
             "CONNECTION ERROR",
         ]
 
-        return any(marker in message for marker in retryable_markers)
+        return any(marker in message for marker in retryable_errors)
+
+    # -----------------------------------------------------
+    # GEMINI GENERATION WITH MODEL FALLBACK
+    # -----------------------------------------------------
 
     @classmethod
     def _generate_answer(cls, clean_query, system_instruction):
-        """Call Gemini with limited retries and API key rotation."""
+        """
+        Try configured models in order.
+        Retry transient errors with exponential backoff.
+        Raise AIServiceUnavailable if all models fail.
+        """
 
         cls._initialize_keys()
-
         last_error = None
 
-        for attempt in range(cls.MAX_RETRIES):
-            try:
-                client = cls.get_genai_client()
+        # Remove duplicate model names while preserving order.
+        models = list(dict.fromkeys(
+            model.strip()
+            for model in cls.MODEL_NAMES
+            if model and model.strip()
+        ))
 
-                print(
-                    f"Gemini request: attempt "
-                    f"{attempt + 1}/{cls.MAX_RETRIES}"
-                )
+        for model_name in models:
+            logger.info("Trying Gemini model: %s", model_name)
 
-                response = client.models.generate_content(
-                    model=cls.MODEL_NAME,
-                    contents=clean_query,
-                    config=types.GenerateContentConfig(
-                        system_instruction=system_instruction,
-                        temperature=0.2,
-                        max_output_tokens=2048,
-                    ),
-                )
+            for attempt in range(cls.MAX_RETRIES_PER_MODEL):
+                try:
+                    client = cls.get_genai_client()
 
-                if response.text:
-                    return response.text
-
-                raise RuntimeError(
-                    "Gemini returned an empty response."
-                )
-
-            except Exception as e:
-                last_error = e
-
-                print(
-                    f"Gemini API error "
-                    f"(attempt {attempt + 1}): {e}"
-                )
-
-                if not cls._is_retryable_error(e):
-                    break
-
-                if attempt < cls.MAX_RETRIES - 1:
-                    delay = min(
-                        cls.INITIAL_RETRY_DELAY * (2 ** attempt),
-                        cls.MAX_RETRY_DELAY,
+                    logger.info(
+                        "Gemini request: model=%s attempt=%s/%s",
+                        model_name,
+                        attempt + 1,
+                        cls.MAX_RETRIES_PER_MODEL,
                     )
 
-                    delay += random.uniform(0, 0.3)
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents=clean_query,
+                        config=types.GenerateContentConfig(
+                            system_instruction=system_instruction,
+                            temperature=0.2,
+                            max_output_tokens=cls.MAX_OUTPUT_TOKENS,
+                        ),
+                    )
 
-                    print(f"Retrying in {delay:.1f} seconds...")
-                    time.sleep(delay)
+                    answer = getattr(response, "text", None)
 
-        print(f"Gemini request failed: {last_error}")
+                    if answer and answer.strip():
+                        logger.info(
+                            "Gemini generation succeeded with %s",
+                            model_name,
+                        )
+                        return answer.strip()
 
-        return (
-            "တောင်းပန်ပါတယ်၊ AI ဝန်ဆောင်မှုကို "
-            "ယာယီအသုံးပြု၍မရသေးပါ။ "
-            "ခဏစောင့်ပြီး ထပ်မံကြိုးစားပေးပါ။"
-        )
+                    raise RuntimeError(
+                        f"{model_name} returned an empty response."
+                    )
+
+                except Exception as error:
+                    last_error = error
+
+                    logger.warning(
+                        "Gemini failed: model=%s attempt=%s error=%s",
+                        model_name,
+                        attempt + 1,
+                        error,
+                    )
+
+                    # Invalid model/key/request: try the next model
+                    # only when it makes sense; don't retry permanently.
+                    if not cls._is_retryable_error(error):
+                        break
+
+                    if attempt < cls.MAX_RETRIES_PER_MODEL - 1:
+                        delay = min(
+                            cls.INITIAL_RETRY_DELAY * (2 ** attempt),
+                            cls.MAX_RETRY_DELAY,
+                        )
+                        delay += random.uniform(0, 0.5)
+
+                        logger.info("Retrying in %.1f seconds", delay)
+                        time.sleep(delay)
+
+            logger.warning(
+                "Moving to next fallback model after failure: %s",
+                model_name,
+            )
+
+        logger.error("All Gemini models failed: %s", last_error)
+
+        raise AIServiceUnavailable(
+            "Gemini service is temporarily unavailable."
+        ) from last_error
+
+    # -----------------------------------------------------
+    # MAIN RAG ENTRY POINT
+    # -----------------------------------------------------
 
     @classmethod
-    def _select_documents(
-        cls,
-        retriever,
-        clean_query,
-        detected_crop,
-        detected_intent,
-    ):
-        """Select relevant documents using direct matching and BM25."""
+    def answer_query(cls, user_query: str) -> str:
+        """Retrieve agricultural documents and generate an answer."""
+
+        clean_query = (user_query or "").strip()
+
+        if not clean_query:
+            return "ကျေးဇူးပြု၍ မေးခွန်း ရေးသားပေးပါ။"
+
+        retriever = cls.get_retriever()
+
+        if retriever is None:
+            raise RuntimeError(
+                "Knowledge Base ကို ဖတ်၍မရပါ။ "
+                "kb/bm25_retriever.pkl ကို စစ်ဆေးပါ။"
+            )
+
+        _, detected_crop, detected_intent = (
+            cls.smart_query_processing(clean_query)
+        )
 
         docs = []
 
         # 1. Direct matching by crop and intent
         if detected_crop and detected_intent:
-            print(
-                f"Direct matching: "
-                f"Crop={detected_crop}, "
-                f"Intent={detected_intent}"
+            logger.info(
+                "Direct matching: Crop=%s Intent=%s",
+                detected_crop,
+                detected_intent,
             )
 
             matching_docs = []
 
             for doc in cls._all_docs_cache or []:
                 source = str(doc.metadata.get("source", ""))
-                content = doc.page_content
+                content = doc.page_content or ""
 
-                # Preserve the existing source-based crop matching
                 if detected_crop not in source:
                     continue
 
@@ -346,150 +422,94 @@ class RAGService:
                     matching_docs.append(doc)
 
             if matching_docs:
-                docs = matching_docs[
-                    :cls.MAX_DOCUMENTS_DIRECT_MATCH
-                ]
+                docs = matching_docs
 
-        # 2. BM25 retrieval if direct matching fails
+        # 2. BM25 fallback retrieval
         if not docs:
             if detected_crop and detected_intent:
                 search_query = (
-                    f"{detected_crop} {detected_intent} "
-                    f"{clean_query}"
+                    f"{detected_crop} {detected_intent} {clean_query}"
                 )
             elif detected_crop:
                 search_query = f"{detected_crop} {clean_query}"
             else:
                 search_query = clean_query
 
-            retriever.k = cls.RETRIEVER_TOP_K
+            retriever.k = 60
             docs = retriever.invoke(search_query)
 
-            # Prefer documents belonging to the detected crop
+            # Prefer documents from the requested crop when available.
             if detected_crop:
                 filtered_docs = [
                     doc
                     for doc in docs
-                    if detected_crop
-                    in str(doc.metadata.get("source", ""))
+                    if detected_crop in str(
+                        doc.metadata.get("source", "")
+                    )
                 ]
 
                 if filtered_docs:
                     docs = filtered_docs
 
-        return docs
-
-    @classmethod
-    def _build_context(cls, docs):
-        """Build a context string with a maximum character limit."""
-
-        context_parts = []
-        remaining_chars = cls.MAX_CONTEXT_CHARS
+        # 3. Remove duplicate documents and limit context size.
+        selected_docs = []
+        seen = set()
+        context_size = 0
 
         for doc in docs:
             content = (doc.page_content or "").strip()
 
-            if not content:
+            if not content or content in seen:
                 continue
 
-            if remaining_chars <= 0:
+            seen.add(content)
+
+            source = str(doc.metadata.get("source", "Unknown"))
+            block = f"Source: {source}\n{content}"
+
+            remaining = cls.MAX_CONTEXT_CHARS - context_size
+
+            if remaining <= 0:
                 break
 
-            # Include a source label when available
-            source = str(doc.metadata.get("source", "Unknown"))
+            if len(block) > remaining:
+                block = block[:remaining]
 
-            section = (
-                f"Source: {source}\n"
-                f"{content}"
-            )
+            selected_docs.append(block)
+            context_size += len(block)
 
-            if len(section) > remaining_chars:
-                section = section[:remaining_chars]
+        logger.info(
+            "Final selected documents: %s",
+            len(selected_docs),
+        )
 
-            context_parts.append(section)
-            remaining_chars -= len(section) + 9
-
-        return "\n\n---\n\n".join(context_parts)
-
-    @classmethod
-    def answer_query(cls, user_query: str) -> str:
-        """Retrieve agricultural context and generate an answer."""
-
-        clean_query = (user_query or "").strip()
-
-        if not clean_query:
-            return "ကျေးဇူးပြု၍ မေးခွန်း ရေးသားပေးပါ။"
-
-        try:
-            retriever = cls.get_retriever()
-
-            if retriever is None:
-                return (
-                    "Knowledge Base မရှိသေးပါ။ "
-                    "ingest.py ကို အရင် Run ပါ။"
-                )
-
-            _, detected_crop, detected_intent = (
-                cls.smart_query_processing(clean_query)
-            )
-
-            docs = cls._select_documents(
-                retriever= retriever,
-                clean_query=clean_query,
-                detected_crop=detected_crop,
-                detected_intent=detected_intent,
-            )
-
-            print(f"Final selected documents: {len(docs)}")
-
-            for i, doc in enumerate(docs[:3]):
-                print(
-                    f"[Document {i + 1}] "
-                    f"Source: {doc.metadata.get('source', 'Unknown')} "
-                    f"| Content: {doc.page_content[:120]}..."
-                )
-
-            if not docs:
-                return (
-                    "ဒီအကြောင်းအရာနှင့် ပတ်သက်သည့် "
-                    "အချက်အလက် ဒေတာဘေ့စ်ထဲတွင် မရှိသေးပါ။"
-                )
-
-            # Build bounded context
-            context_text = cls._build_context(docs)
-
-            if not context_text.strip():
-                return (
-                    "ဒီအကြောင်းအရာနှင့် ပတ်သက်သည့် "
-                    "အချက်အလက် ဒေတာဘေ့စ်ထဲတွင် မရှိသေးပါ။"
-                )
-
-            system_instruction = (
-                "You are an expert Myanmar Agricultural AI Assistant.\n\n"
-                "INSTRUCTIONS:\n"
-                "1. Answer the user's question using only the provided Context.\n"
-                "2. Include the relevant sections, methods, and items "
-                "available in the Context.\n"
-                "3. Answer in natural, polite Myanmar language.\n"
-                "4. Use headings or bullet points when appropriate.\n"
-                "5. Do not invent agricultural facts absent from the Context.\n"
-                "6. If the Context does not contain relevant information, "
-                "reply exactly: "
-                "'ဒီအကြောင်းအရာနှင့် ပတ်သက်သည့် "
-                "အချက်အလက် ဒေတာဘေ့စ်ထဲတွင် မရှိသေးပါ။'\n\n"
-                f"Context:\n{context_text}"
-            )
-
-            return cls._generate_answer(
-                clean_query,
-                system_instruction,
-            )
-
-        except Exception as e:
-            print(f"RAG service error: {e}")
-
+        if not selected_docs:
             return (
-                "တောင်းပန်ပါတယ်၊ စနစ်တွင် အမှားတစ်ခု "
-                "ဖြစ်ပေါ်နေပါတယ်။ ခဏအကြာတွင် "
-                "ထပ်မံကြိုးစားပေးပါ။"
+                "ဒီအကြောင်းအရာနှင့် ပတ်သက်သည့် "
+                "အချက်အလက် ဒေတာဘေ့စ်ထဲတွင် မရှိသေးပါ။"
             )
+
+        # 4. Build the context for Gemini.
+        context_text = "\n\n---\n\n".join(selected_docs)
+
+        system_instruction = (
+            "You are an expert Myanmar Agricultural AI Assistant.\n\n"
+            "INSTRUCTIONS:\n"
+            "1. Answer using ONLY the provided Context.\n"
+            "2. Include relevant sections, methods, and steps from Context.\n"
+            "3. Answer in full, natural, polite Myanmar language.\n"
+            "4. Use headings and bullet points when useful.\n"
+            "5. Do not invent agricultural facts absent from Context.\n"
+            "6. If Context has no relevant information, reply exactly:\n"
+            "'ဒီအကြောင်းအရာနှင့် ပတ်သက်သည့် "
+            "အချက်အလက် ဒေတာဘေ့စ်ထဲတွင် မရှိသေးပါ။'\n\n"
+            f"Context:\n{context_text}"
+        )
+
+        # 5. Generate answer.
+        # AIServiceUnavailable is intentionally allowed to propagate
+        # so the Flask route can return success=False and HTTP 503.
+        return cls._generate_answer(
+            clean_query,
+            system_instruction,
+        )
