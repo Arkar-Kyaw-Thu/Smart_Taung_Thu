@@ -437,7 +437,8 @@
             fetchBtn.disabled = true;
             loadingBox.style.display = 'flex';
 
-            fetch('/fetch-market-price', {
+            
+            fetch('/api/refresh-price', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' }
             })
@@ -474,51 +475,131 @@
 
             fetch('/fetch-youtube-preview', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(res => res.json())
-            .then(data => {
-                btn.disabled = false;
-                btn.innerText = "🔄 Fetch YouTube Preview";
-
-                if (data.success && data.videos.length > 0) {
-                    previewList.innerHTML = "";
-                    previewContainer.style.display = "block";
-
-                    data.videos.forEach((video, index) => {
-                        const cardHtml = `
-                            <div id="preview-card-${index}" class="preview-card-item" data-index="${index}" data-link="${video.link}" style="background: white; padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 15px; border: 1px solid #cbd5e1;">
-                                <div style="display: flex; align-items: center; gap: 15px; flex: 1;">
-                                    <img src="${video.thumbnail}" style="width: 120px; height: 70px; object-fit: cover; border-radius: 6px;">
-                                    <div style="flex: 1;">
-                                        <input type="text" id="title-${index}" class="preview-title-input" value="${video.title}" style="width: 100%; font-weight: bold; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; margin-bottom: 5px;">
-                                        <a href="${video.link}" target="_blank" style="font-size: 12px; color: #2563eb; text-decoration: none;">▶ YouTube တွင် Preview သွားကြည့်မည်</a>
-                                    </div>
-                                </div>
-
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                    <select id="type-${index}" class="preview-type-select" style="padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-weight: bold;">
-                                        <option value="news" ${video.suggested_type === 'news' ? 'selected' : ''}>သတင်း (News)</option>
-                                        <option value="knowledge" ${video.suggested_type === 'knowledge' ? 'selected' : ''}>ဗဟုသုတ (Knowledge)</option>
-                                    </select>
-
-                                    <button onclick="discardPreviewCard('${index}')" style="background: #ef4444; color: white; border: none; padding: 8px 12px; border-radius: 6px; font-weight: bold; cursor: pointer;">
-                                        🗑️ ဖျက်မည်
-                                    </button>
-                                </div>
-                            </div>
-                        `;
-                        previewList.insertAdjacentHTML('beforeend', cardHtml);
-                    });
-                } else {
-                    alert("ℹ️ သတင်းအသစ် ထပ်မတွေ့ရှိပါ။ (သို့မဟုတ် ရှိပြီးသား သတင်းများ ဖြစ်နေပါသည်)");
-                    previewContainer.style.display = "none";
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 }
             })
+            .then(async (res) => {
+                const rawText = await res.text();
+
+                console.log('YouTube Preview HTTP Status:', res.status);
+                console.log('YouTube Preview Response:', rawText);
+
+                let data;
+
+                try {
+                    data = JSON.parse(rawText);
+                } catch (error) {
+                    throw new Error(
+                        `Server returned invalid JSON (HTTP ${res.status}). ` +
+                        rawText.substring(0, 300)
+                    );
+                }
+
+                if (!res.ok) {
+                    throw new Error(
+                        data.message || `HTTP Error ${res.status}`
+                    );
+                }
+
+                return data;
+            })
+            .then(data => {
+                if (!data.success) {
+                    throw new Error(
+                        data.message || 'YouTube scraping failed.'
+                    );
+                }
+
+                const videos = Array.isArray(data.videos)
+                    ? data.videos
+                    : [];
+
+                if (videos.length === 0) {
+                    alert("ℹ️ သတင်းအသစ် ထပ်မတွေ့ရှိပါ။");
+                    previewContainer.style.display = "none";
+                    return;
+                }
+
+                previewList.innerHTML = "";
+                previewContainer.style.display = "block";
+
+                videos.forEach((video, index) => {
+                    const cardHtml = `
+                        <div id="preview-card-${index}"
+                            class="preview-card-item"
+                            data-index="${index}"
+                            data-link="${video.link || ''}"
+                            style="background:white;padding:15px;border-radius:8px;
+                            display:flex;align-items:center;justify-content:space-between;
+                            gap:15px;border:1px solid #cbd5e1;">
+
+                            <div style="display:flex;align-items:center;gap:15px;flex:1;">
+                                <img src="${video.thumbnail || ''}"
+                                    style="width:120px;height:70px;object-fit:cover;
+                                    border-radius:6px;">
+
+                                <div style="flex:1;">
+                                    <input type="text"
+                                        id="title-${index}"
+                                        class="preview-title-input"
+                                        value="${(video.title || '')
+                                            .replace(/&/g, '&amp;')
+                                            .replace(/"/g, '&quot;')
+                                            .replace(/</g, '&lt;')
+                                            .replace(/>/g, '&gt;')}"
+                                        style="width:100%;font-weight:bold;padding:6px;
+                                        border:1px solid #cbd5e1;border-radius:4px;
+                                        margin-bottom:5px;">
+
+                                    <a href="${video.link || '#'}"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style="font-size:12px;color:#2563eb;
+                                    text-decoration:none;">
+                                    ▶ YouTube တွင် Preview သွားကြည့်မည်
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div style="display:flex;align-items:center;gap:10px;">
+                                <select id="type-${index}"
+                                        class="preview-type-select"
+                                        style="padding:8px;border-radius:6px;
+                                        border:1px solid #cbd5e1;font-weight:bold;">
+                                    <option value="news"
+                                        ${video.suggested_type === 'news'
+                                            ? 'selected' : ''}>
+                                        သတင်း (News)
+                                    </option>
+                                    <option value="knowledge"
+                                        ${video.suggested_type !== 'news'
+                                            ? 'selected' : ''}>
+                                        ဗဟုသုတ (Knowledge)
+                                    </option>
+                                </select>
+
+                                <button onclick="discardPreviewCard('${index}')"
+                                        style="background:#ef4444;color:white;border:none;
+                                        padding:8px 12px;border-radius:6px;
+                                        font-weight:bold;cursor:pointer;">
+                                    🗑️ ဖျက်မည်
+                                </button>
+                            </div>
+                        </div>
+                    `;
+
+                    previewList.insertAdjacentHTML('beforeend', cardHtml);
+                });
+            })
             .catch(err => {
+                console.error('YouTube Preview Error:', err);
+                alert("❌ Error: " + err.message);
+            })
+            .finally(() => {
                 btn.disabled = false;
                 btn.innerText = "🔄 Fetch YouTube Preview";
-                alert("❌ Error: " + err);
             });
         }
 

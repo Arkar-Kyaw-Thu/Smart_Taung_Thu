@@ -17,6 +17,7 @@ from flask import (
 )
 from werkzeug.utils import secure_filename
 
+from service.price_service import MarketPriceService
 from storage import (
     BASE_DIR,
     DATA_DIR,
@@ -716,7 +717,7 @@ def download_price(filename):
 @app.route("/api/refresh-price", methods=["POST"])
 def refresh_price():
     try:
-        filepath, filename = MediaService.fetch_and_save_excel()
+        filepath, filename = MarketPriceService.fetch_and_save_excel()
 
         if not filepath or not filename:
             return error_response(
@@ -734,9 +735,180 @@ def refresh_price():
             ),
         })
 
-    except Exception:
+    except Exception as e:
         logger.exception("Market price refresh failed")
-        return error_response("Market price refresh failed.", 500)
+        return jsonify({
+            "success": False,
+            "message": "Market price refresh failed.",
+            "debug_error": str(e),
+        }), 500
+
+
+# =========================================================
+# YouTube Media Preview API
+# POST /fetch-youtube-preview
+# POST /save-youtube-media
+# POST /save-batch-youtube-media
+# =========================================================
+
+@app.route("/fetch-youtube-preview", methods=["POST"])
+def fetch_youtube_preview():
+    try:
+        videos = MediaService.preview_youtube_videos(
+            limit_per_channel=100
+        )
+
+        return jsonify({
+            "success": True,
+            "message": f"{len(videos)} videos found.",
+            "videos": videos,
+        })
+
+    except Exception as exc:
+        logger.exception("YouTube preview failed")
+
+        return jsonify({
+            "success": False,
+            "message": "YouTube scraping failed.",
+            "debug_error": str(exc),
+            "videos": [],
+        }), 500
+
+
+@app.route("/save-youtube-media", methods=["POST"])
+def save_youtube_media():
+    data = get_request_data()
+
+    if data is None:
+        return error_response(
+            "Request body must be a valid JSON object.",
+            400,
+        )
+
+    description = data.get("description", "")
+    link = data.get("link", "")
+    media_type = data.get("type", "knowledge")
+
+    if media_type not in {"news", "knowledge"}:
+        return error_response("Invalid media type.", 400)
+
+    try:
+        result = MediaService.save_media_from_preview(
+            description=description,
+            link=link,
+            media_type=media_type,
+        )
+
+        return jsonify({
+            "success": True,
+            "message": result.get(
+                "message",
+                "Media saved successfully."
+            ),
+            "already_exists": result.get(
+                "already_exists", False
+            ),
+            "data": result.get("media"),
+        })
+
+    except ValueError as exc:
+        return error_response(str(exc), 400)
+
+    except Exception:
+        logger.exception("Could not save YouTube media")
+
+        return error_response(
+            "Could not save YouTube media.",
+            500,
+        )
+
+
+@app.route("/save-batch-youtube-media", methods=["POST"])
+def save_batch_youtube_media():
+    data = get_request_data()
+
+    if data is None:
+        return error_response(
+            "Request body must be a valid JSON object.",
+            400,
+        )
+
+    items = data.get("items")
+
+    if not isinstance(items, list):
+        return error_response(
+            "'items' must be a list.",
+            400,
+        )
+
+    if len(items) > 200:
+        return error_response(
+            "A maximum of 200 items can be saved at once.",
+            400,
+        )
+
+    saved = 0
+    skipped = 0
+    failed = []
+
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            failed.append({
+                "index": index,
+                "message": "Invalid item format.",
+            })
+            continue
+
+        media_type = item.get("type", "knowledge")
+
+        if media_type not in {"news", "knowledge"}:
+            failed.append({
+                "index": index,
+                "message": "Invalid media type.",
+            })
+            continue
+
+        try:
+            result = MediaService.save_media_from_preview(
+                description=item.get("description", ""),
+                link=item.get("link", ""),
+                media_type=media_type,
+            )
+
+            if result.get("already_exists"):
+                skipped += 1
+            else:
+                saved += 1
+
+        except (ValueError, OSError) as exc:
+            failed.append({
+                "index": index,
+                "message": str(exc),
+            })
+
+        except Exception:
+            logger.exception(
+                "Batch YouTube save failed at index %s",
+                index,
+            )
+            failed.append({
+                "index": index,
+                "message": "Could not save this item.",
+            })
+
+    success = len(failed) == 0
+
+    return jsonify({
+        "success": success,
+        "message": (
+            f"Saved: {saved}, already existed: {skipped}, "
+            f"failed: {len(failed)}."
+        ),
+        "saved": saved,
+        "skipped": skipped,
+        "failed_count": len(failed),
+        "errors": failed,
+    }), (200 if success else 207)
 
 
 # =========================================================
